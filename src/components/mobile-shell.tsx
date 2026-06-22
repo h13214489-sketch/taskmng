@@ -1,6 +1,6 @@
 import { CalendarDays, CheckCircle2, ListChecks, ListTodo, Menu, Plus, Settings2, Tags, UtensilsCrossed, X } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 import { TaskSheet } from "@/components/task-sheet";
@@ -23,6 +23,7 @@ const otherNavItems = [
 export function MobileShell() {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const {
     menuExpanded,
     toggleMenu,
@@ -39,6 +40,31 @@ export function MobileShell() {
   } = useAppStore();
   const shellOverlayHistoryActiveRef = useRef(false);
   const shellOverlayClosingFromHistoryRef = useRef(false);
+
+  function requestCloseMenu() {
+    if (!menuExpanded) {
+      return;
+    }
+
+    if (shellOverlayHistoryActiveRef.current) {
+      shellOverlayClosingFromHistoryRef.current = true;
+      window.history.back();
+      return;
+    }
+
+    toggleMenu();
+  }
+
+  function handleMenuNavigate(to: string) {
+    if (!menuExpanded) {
+      navigate(to);
+      return;
+    }
+
+    shellOverlayClosingFromHistoryRef.current = true;
+    toggleMenu();
+    navigate(to, { replace: true });
+  }
 
   useEffect(() => {
     const shouldLock = menuExpanded || Boolean(editorMode);
@@ -104,7 +130,7 @@ export function MobileShell() {
 
   return (
     <div className="min-h-screen bg-[#edf4ff] text-slate-900">
-      {menuExpanded ? <div className="fixed inset-0 z-40 bg-slate-900/20" onClick={toggleMenu} /> : null}
+      {menuExpanded ? <div className="fixed inset-0 z-40 bg-slate-900/20" onClick={requestCloseMenu} /> : null}
 
       <aside
         className={cn(
@@ -124,7 +150,10 @@ export function MobileShell() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                onClick={() => toggleMenu()}
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleMenuNavigate(item.to);
+                }}
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold transition",
                   active ? "bg-blue-700 text-white shadow-lg shadow-blue-900/15" : "text-slate-500 hover:bg-blue-50",
@@ -146,7 +175,10 @@ export function MobileShell() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                onClick={() => toggleMenu()}
+                onClick={(event) => {
+                  event.preventDefault();
+                  handleMenuNavigate(item.to);
+                }}
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold transition",
                   active ? "bg-blue-700 text-white shadow-lg shadow-blue-900/15" : "text-slate-500 hover:bg-blue-50",
@@ -165,7 +197,7 @@ export function MobileShell() {
           <div className="flex items-start gap-2">
             <button
               type="button"
-              onClick={toggleMenu}
+              onClick={menuExpanded ? requestCloseMenu : toggleMenu}
               className="z-30 mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-700 text-white shadow-lg shadow-blue-900/20"
               aria-label={menuExpanded ? t("close") : t("menu")}
             >

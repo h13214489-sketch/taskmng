@@ -27,6 +27,14 @@ const severityStyles: Record<CalendarSeverity, string> = {
   overdue: "bg-rose-50 text-rose-700",
 };
 
+const severityEdgeStyles: Record<CalendarSeverity, string> = {
+  none: "border-transparent",
+  low: "border-sky-400/80",
+  medium: "border-blue-500/80",
+  high: "border-indigo-500/80",
+  overdue: "border-rose-500/80",
+};
+
 export function CalendarGrid({ month, selectedDate, severityByDate, onSelectDate }: CalendarGridProps) {
   const monthDate = parseStorageDate(month);
   const range = eachDayOfInterval({
@@ -46,6 +54,7 @@ export function CalendarGrid({ month, selectedDate, severityByDate, onSelectDate
         {range.map((day) => {
           const storageDate = toStorageDate(day);
           const severity = severityByDate[storageDate] ?? "none";
+          const hasTasks = severity !== "none";
           const isSelected = storageDate === selectedDate;
           const isToday = storageDate === today;
 
@@ -57,7 +66,9 @@ export function CalendarGrid({ month, selectedDate, severityByDate, onSelectDate
               className={cn(
                 "relative aspect-square rounded-2xl border p-2 text-left text-xs transition",
                 severityStyles[severity],
-                isSameMonth(day, monthDate) ? "border-transparent" : "border-slate-100 text-slate-300",
+                isSameMonth(day, monthDate)
+                  ? cn(hasTasks && "border-2", severityEdgeStyles[severity])
+                  : "border-slate-100 text-slate-300",
                 isSelected && "ring-2 ring-blue-700 ring-offset-2 ring-offset-blue-50",
                 !isSelected && isToday && "ring-2 ring-slate-900/40 ring-offset-2 ring-offset-blue-50",
                 isToday && "shadow-sm shadow-slate-900/10",

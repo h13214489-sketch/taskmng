@@ -161,7 +161,6 @@ export function TaskSheet({
         <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" />
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-500">{t("appName")}</p>
             <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
           </div>
           <button
@@ -323,7 +322,6 @@ export function TaskSheet({
             </label>
 
             <label className="block space-y-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("deadline")}</span>
               <input
                 value={deadline}
                 onChange={(event) => setDeadline(event.target.value)}
@@ -363,7 +361,6 @@ export function TaskSheet({
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("photoUpload")}</span>
               <input
                 ref={fileInputRef}
                 type="file"

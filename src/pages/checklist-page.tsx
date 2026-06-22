@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Check, MoreHorizontal, Plus, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/use-app-store";
+
+type ChecklistFilter = "all" | "todo" | "complete";
 
 export default function ChecklistPage() {
   const { t } = useTranslation();
@@ -11,6 +13,7 @@ export default function ChecklistPage() {
   const [title, setTitle] = useState("");
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [filter, setFilter] = useState<ChecklistFilter>("all");
   const canSubmit = Boolean(title.trim());
 
   const sortedItems = useMemo(() => {
@@ -24,6 +27,21 @@ export default function ChecklistPage() {
   }, [checklistItems]);
   const completedCount = sortedItems.filter((item) => item.completed).length;
   const remainingCount = sortedItems.length - completedCount;
+  const filteredItems = useMemo(() => {
+    if (filter === "complete") {
+      return sortedItems.filter((item) => item.completed);
+    }
+
+    if (filter === "todo") {
+      return sortedItems.filter((item) => !item.completed);
+    }
+
+    return sortedItems;
+  }, [filter, sortedItems]);
+
+  useEffect(() => {
+    setSelectedIds([]);
+  }, [filter]);
 
   function toggleSelected(itemId: string) {
     setSelectedIds((current) => (current.includes(itemId) ? current.filter((id) => id !== itemId) : [...current, itemId]));
@@ -55,14 +73,30 @@ export default function ChecklistPage() {
       <section className="rounded-[30px] border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-900/5">
         <div className="flex items-center gap-2">
           <div className="grid min-w-0 flex-1 grid-cols-2 gap-2">
-            <div className="rounded-[22px] bg-blue-50 px-3 py-2.5">
+            <button
+              type="button"
+              onClick={() => setFilter((current) => (current === "todo" ? "all" : "todo"))}
+              aria-pressed={filter === "todo"}
+              className={cn(
+                "rounded-[22px] bg-blue-50 px-3 py-2.5 text-left transition hover:bg-blue-100",
+                filter === "todo" && "ring-2 ring-blue-700/30",
+              )}
+            >
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-500">{t("todo")}</p>
               <p className="mt-0.5 text-lg font-semibold text-slate-900">{remainingCount}</p>
-            </div>
-            <div className="rounded-[22px] bg-emerald-50 px-3 py-2.5">
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter((current) => (current === "complete" ? "all" : "complete"))}
+              aria-pressed={filter === "complete"}
+              className={cn(
+                "rounded-[22px] bg-emerald-50 px-3 py-2.5 text-left transition hover:bg-emerald-100",
+                filter === "complete" && "ring-2 ring-emerald-600/30",
+              )}
+            >
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600">{t("complete")}</p>
               <p className="mt-0.5 text-lg font-semibold text-slate-900">{completedCount}</p>
-            </div>
+            </button>
           </div>
 
           {selectionMode ? (
@@ -131,13 +165,13 @@ export default function ChecklistPage() {
           </button>
         </form>
 
-        {sortedItems.length === 0 ? (
+        {filteredItems.length === 0 ? (
           <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
             {t("noCheckListItems")}
           </div>
         ) : (
           <section className="space-y-3">
-            {sortedItems.map((item) => (
+            {filteredItems.map((item) => (
               <div
                 key={item.id}
                 role={selectionMode ? "button" : undefined}

@@ -1,12 +1,14 @@
-import { useMemo } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { CalendarGrid } from "@/components/calendar-grid";
 import { TaskCard } from "@/components/task-card";
+import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/use-app-store";
+import type { Language } from "@/types/models";
 import { buildCalendarSeverity, resolveTasksForDate, resolveTasksForMonth } from "@/utils/task-logic";
-import { parseStorageDate, todayStorageDate } from "@/utils/date";
+import { parseStorageDate, toStorageDate, todayStorageDate } from "@/utils/date";
 
 export default function CalendarPage() {
   const { t } = useTranslation();
@@ -25,6 +27,11 @@ export default function CalendarPage() {
     openDetailSheet,
     openCompleteSheet,
   } = useAppStore();
+  const [monthPickerOpen, setMonthPickerOpen] = useState(false);
+  const [pickerMode, setPickerMode] = useState<"month" | "year">("month");
+  const [pickerYear, setPickerYear] = useState<number>(() => parseStorageDate(currentMonth).getFullYear());
+  const [pickerMonth, setPickerMonth] = useState<number>(() => parseStorageDate(currentMonth).getMonth());
+  const [pickerDecadeStart, setPickerDecadeStart] = useState<number>(() => Math.floor(pickerYear / 10) * 10);
 
   const snapshot = useMemo(
     () => ({ series, occurrences, checklistItems, menuItems, tags, settings }),
@@ -42,30 +49,78 @@ export default function CalendarPage() {
     }, {});
   }, [monthTasks]);
 
+  useEffect(() => {
+    if (!monthPickerOpen) {
+      return;
+    }
+
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [monthPickerOpen]);
+
+  function openMonthPicker() {
+    const monthDate = parseStorageDate(currentMonth);
+    const year = monthDate.getFullYear();
+    setPickerYear(year);
+    setPickerMonth(monthDate.getMonth());
+    setPickerDecadeStart(Math.floor(year / 10) * 10);
+    setPickerMode("month");
+    setMonthPickerOpen(true);
+  }
+
+  function closeMonthPicker() {
+    setMonthPickerOpen(false);
+  }
+
+  function monthLabel(language: Language, monthIndex: number) {
+    if (language === "zh") {
+      return `${monthIndex + 1}月`;
+    }
+
+    return new Date(2020, monthIndex, 1).toLocaleDateString("en-GB", { month: "short" });
+  }
+
+  function handleSelectMonth(monthIndex: number) {
+    const nextDate = toStorageDate(new Date(pickerYear, monthIndex, 1));
+    setPickerMonth(monthIndex);
+    setSelectedDate(nextDate);
+    closeMonthPicker();
+  }
+
   return (
     <div className="space-y-4">
-      <section className="rounded-[28px] bg-blue-700 px-4 text-white shadow-xl shadow-blue-900/15">
+      <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-blue-700 via-blue-700 to-indigo-800 px-4 text-white shadow-xl shadow-blue-900/15">
         <div className="flex h-12 items-center justify-between gap-3">
           <div>
-            <h1 className="text-sm font-semibold">
-              {parseStorageDate(currentMonth).toLocaleDateString(settings.language === "zh" ? "zh-HK" : "en-GB", {
-                month: "long",
-                year: "numeric",
-              })}
-            </h1>
+            <button
+              type="button"
+              onClick={openMonthPicker}
+              className="inline-flex items-center gap-1 text-left text-sm font-semibold text-white/95"
+            >
+              <span>
+                {parseStorageDate(currentMonth).toLocaleDateString(settings.language === "zh" ? "zh-HK" : "en-GB", {
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
+              <ChevronDown className="h-4 w-4 text-white/70" />
+            </button>
           </div>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => shiftCurrentMonth(-1)}
-              className="rounded-full border border-blue-500 p-1.5 text-blue-50"
+              className="rounded-full border border-white/15 bg-white/5 p-1.5 text-white/90 backdrop-blur-sm transition hover:bg-white/10"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={() => shiftCurrentMonth(1)}
-              className="rounded-full border border-blue-500 p-1.5 text-blue-50"
+              className="rounded-full border border-white/15 bg-white/5 p-1.5 text-white/90 backdrop-blur-sm transition hover:bg-white/10"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -113,6 +168,127 @@ export default function CalendarPage() {
             ))
         )}
       </section>
+
+      {monthPickerOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/30 px-4 backdrop-blur-sm"
+          onClick={closeMonthPicker}
+        >
+          <section
+            className="w-full max-w-[22rem] rounded-[28px] bg-white p-4 shadow-2xl shadow-slate-900/15"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              {pickerMode === "year" ? (
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                  {pickerDecadeStart} - {pickerDecadeStart + 9}
+                </p>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPickerYear((value) => value - 1)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700"
+                    aria-label="Previous year"
+                  >
+                    <ChevronUp className="h-4 w-4" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPickerDecadeStart(Math.floor(pickerYear / 10) * 10);
+                      setPickerMode("year");
+                    }}
+                    className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-900"
+                  >
+                    {pickerYear}
+                    <ChevronDown className="h-4 w-4 text-slate-500" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPickerYear((value) => value + 1)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700"
+                    aria-label="Next year"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={closeMonthPicker}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700"
+                aria-label={t("close")}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {pickerMode === "year" ? (
+              <div className="mt-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setPickerDecadeStart((value) => value - 10)}
+                    className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                    {pickerDecadeStart - 10}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPickerDecadeStart((value) => value + 10)}
+                    className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700"
+                  >
+                    {pickerDecadeStart + 10}
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-4 gap-2">
+                  {Array.from({ length: 12 }, (_, index) => pickerDecadeStart + index).map((year) => (
+                    <button
+                      key={year}
+                      type="button"
+                      onClick={() => {
+                        setPickerYear(year);
+                        setPickerMode("month");
+                      }}
+                      className={cn(
+                        "h-12 rounded-2xl text-sm font-semibold transition",
+                        year === pickerYear
+                          ? "bg-blue-700 text-white shadow-lg shadow-blue-900/15"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200",
+                      )}
+                    >
+                      {year}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 grid grid-cols-4 gap-2">
+                {Array.from({ length: 12 }, (_, index) => index).map((monthIndex) => (
+                  <button
+                    key={monthIndex}
+                    type="button"
+                    onClick={() => handleSelectMonth(monthIndex)}
+                    className={cn(
+                      "h-12 rounded-2xl text-sm font-semibold transition",
+                      monthIndex === pickerMonth
+                        ? "bg-blue-700 text-white shadow-lg shadow-blue-900/15"
+                        : "bg-slate-100 text-slate-700 hover:bg-slate-200",
+                    )}
+                  >
+                    {monthLabel(settings.language, monthIndex)}
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }
