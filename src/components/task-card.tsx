@@ -47,7 +47,7 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
             {t("deadline")}: {toDisplayDate(task.date)}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className={cn("flex items-center gap-2", tagsBelowActions && "flex-col items-end gap-1.5")}>
           {task.status === "pending" ? (
             <button
               type="button"
@@ -69,6 +69,20 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
               {task.status === "complete" ? t("complete") : t("todo")}
             </div>
           )}
+
+          {tagsBelowActions ? (
+            <div className="flex max-w-[9rem] flex-wrap justify-end gap-1.5">
+              {taskTags.map((tag) => (
+                <div
+                  key={tag.id}
+                  className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-white px-2 py-1 text-[10px] font-medium text-slate-600"
+                >
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: tag.color }} />
+                  <span className="truncate">{tag.name}</span>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -135,13 +149,6 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
         </div>
       )}
 
-      {tagsBelowActions ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {taskTags.map((tag) => (
-            <TagChip key={tag.id} label={tag.name} color={tag.color} />
-          ))}
-        </div>
-      ) : null}
     </article>
   );
 }
