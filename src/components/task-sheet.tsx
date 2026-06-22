@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Camera, Pencil, Trash2, X } from "lucide-react";
+import { Camera, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { ImageLightbox } from "@/components/image-lightbox";
@@ -45,7 +45,6 @@ export function TaskSheet({
   const [isMustDo, setIsMustDo] = useState(false);
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [photo, setPhoto] = useState<string | undefined>();
-  const [isEditingDetail, setIsEditingDetail] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ src: string; alt: string } | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
@@ -56,7 +55,6 @@ export function TaskSheet({
       return;
     }
 
-    setIsEditingDetail(false);
     setName("");
     setDetail("");
     setDeadline(toDisplayDate(selectedDate));
@@ -72,18 +70,12 @@ export function TaskSheet({
       return;
     }
 
-    setIsEditingDetail(false);
     setPhoto(undefined);
     setImageError(null);
   }, [mode, task?.seriesId, task?.date]);
 
   useEffect(() => {
     if (mode !== "detail" || !task) {
-      setIsEditingDetail(false);
-      return;
-    }
-
-    if (!isEditingDetail) {
       return;
     }
 
@@ -95,19 +87,15 @@ export function TaskSheet({
     setTagIds(task.tagIds);
     setPhoto(task.photo);
     setImageError(null);
-  }, [isEditingDetail, mode, task]);
+  }, [mode, task?.seriesId, task?.date]);
 
   const title = useMemo(() => {
-    if (mode === "detail") {
-      return t("detail");
-    }
-
     if (mode === "complete") {
       return t("complete");
     }
 
     return t("addTask");
-  }, [mode, task?.name, t]);
+  }, [mode, t]);
 
   if (!open || !mode) {
     return null;
@@ -145,7 +133,7 @@ export function TaskSheet({
 
       if (mode === "detail" && task) {
         await onUpdate(task, payload);
-        setIsEditingDetail(false);
+        setImageError(null);
         return;
       }
 
@@ -190,21 +178,19 @@ export function TaskSheet({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-slate-900/50 backdrop-blur-sm">
-      <section className="max-h-[90vh] w-full overflow-y-auto rounded-t-[32px] bg-blue-50 px-5 pb-8 pt-5 shadow-2xl shadow-blue-900/20">
+      <section className="max-h-[92vh] w-full overflow-y-auto rounded-t-[32px] bg-blue-50 px-5 pb-4 pt-4 shadow-2xl shadow-blue-900/20">
         <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" />
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
-          </div>
+        <div className="mb-3 flex items-center justify-between gap-4">
+          {mode === "detail" ? <div /> : <h2 className="text-lg font-semibold text-slate-900">{title}</h2>}
           <div className="flex items-center gap-2">
-            {mode === "detail" && task && !isEditingDetail ? (
+            {mode === "detail" && task ? (
               <button
                 type="button"
-                onClick={() => setIsEditingDetail(true)}
-                className="rounded-full border border-blue-100 bg-white p-2 text-slate-500 transition hover:border-blue-200"
-                aria-label={t("editTask")}
+                onClick={() => void onDelete(task)}
+                className="rounded-full border border-rose-200 bg-rose-50 p-2 text-rose-600 transition hover:border-rose-300"
+                aria-label={t("delete")}
               >
-                <Pencil className="h-5 w-5" />
+                <Trash2 className="h-5 w-5" />
               </button>
             ) : null}
             <button
@@ -218,67 +204,7 @@ export function TaskSheet({
           </div>
         </div>
 
-        {mode === "detail" && task && !isEditingDetail ? (
-          <div className="space-y-4">
-            <div className="rounded-[28px] border border-blue-100 bg-white p-4">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-slate-900">{task.name}</h3>
-                {task.isMustDo ? <span className="text-sm font-black text-rose-600">!</span> : null}
-              </div>
-              <p className="mt-2 text-sm text-slate-600">{task.detail || "-"}</p>
-              <p className="mt-3 text-xs text-slate-500">
-                {t("deadline")}: {toDisplayDate(task.date)}
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {tags
-                  .filter((tag) => task.tagIds.includes(tag.id))
-                  .map((tag) => (
-                    <TagChip key={tag.id} label={tag.name} color={tag.color} />
-                  ))}
-              </div>
-              {task.photo ? (
-                <button type="button" className="mt-4 block w-full" onClick={() => setPreviewImage({ src: task.photo ?? "", alt: task.name })}>
-                  <img src={task.photo} alt={task.name} className="h-44 w-full rounded-2xl object-cover cursor-zoom-in" loading="lazy" />
-                </button>
-              ) : null}
-              {task.completionPhoto ? (
-                <div className="mt-4 space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("uploadRecord")}</p>
-                  <button
-                    type="button"
-                    className="block w-full"
-                    onClick={() => setPreviewImage({ src: task.completionPhoto ?? "", alt: `${task.name} ${t("uploadRecord")}` })}
-                  >
-                    <img
-                      src={task.completionPhoto}
-                      alt={`${task.name} ${t("uploadRecord")}`}
-                      className="h-44 w-full rounded-2xl object-cover cursor-zoom-in"
-                      loading="lazy"
-                    />
-                  </button>
-                </div>
-              ) : null}
-            </div>
-
-            <button
-              type="button"
-              onClick={() => void onDelete(task)}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600"
-            >
-              <Trash2 className="h-4 w-4" />
-              {t("delete")}
-            </button>
-            {task.isRoutine ? (
-              <button
-                type="button"
-                onClick={() => void onEndRoutine(task)}
-                className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white"
-              >
-                {t("endRoutineTask")}
-              </button>
-            ) : null}
-          </div>
-        ) : mode === "complete" && task ? (
+        {mode === "complete" && task ? (
           <div className="space-y-4">
             <div className="rounded-[28px] border border-blue-100 bg-white p-4">
               <div className="flex items-center gap-2">
@@ -345,33 +271,33 @@ export function TaskSheet({
             </div>
           </div>
         ) : (
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <label className="block space-y-2">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("taskName")}</span>
+          <form className="space-y-3" onSubmit={handleSubmit}>
+            <label className="block space-y-1.5">
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-base font-semibold text-slate-900 outline-none transition focus:border-blue-400"
                 placeholder={t("taskName")}
                 required
               />
             </label>
 
-            <label className="block space-y-2">
+            <label className="block space-y-1.5">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("taskDetail")}</span>
               <textarea
                 value={detail}
                 onChange={(event) => setDetail(event.target.value)}
-                className="min-h-24 w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
+                className="min-h-16 w-full rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-400"
                 placeholder={t("taskDetail")}
               />
             </label>
 
-            <label className="block space-y-2">
+            <label className="block space-y-1.5">
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("deadline")}</span>
               <input
                 value={deadline}
                 onChange={(event) => setDeadline(event.target.value)}
-                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-400"
                 placeholder="dd/mm/yyyy"
                 required
               />
@@ -387,7 +313,7 @@ export function TaskSheet({
               <input type="checkbox" checked={isMustDo} onChange={(event) => setIsMustDo(event.target.checked)} />
             </label>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("chooseTags")}</span>
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
@@ -406,7 +332,7 @@ export function TaskSheet({
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               <input
                 ref={fileInputRef}
                 type="file"
@@ -420,7 +346,7 @@ export function TaskSheet({
                 type="button"
                 onClick={openFilePicker}
                 disabled={isProcessingImage}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-4 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("photoUpload")}...` : t("photoUpload")}</span>
@@ -434,27 +360,48 @@ export function TaskSheet({
               ) : null}
             </div>
 
-            <div className="grid grid-cols-2 gap-3 pt-2">
+            {mode === "detail" && task?.completionPhoto ? (
               <button
                 type="button"
-                onClick={() => {
-                  if (mode === "detail") {
-                    setIsEditingDetail(false);
-                    return;
-                  }
-                  onClose();
-                }}
-                className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
+                className="block w-full"
+                onClick={() => setPreviewImage({ src: task.completionPhoto ?? "", alt: `${task.name} ${t("uploadRecord")}` })}
               >
-                {t("cancel")}
+                <img
+                  src={task.completionPhoto}
+                  alt={`${task.name} ${t("uploadRecord")}`}
+                  className="h-28 w-full rounded-2xl object-cover cursor-zoom-in"
+                  loading="lazy"
+                />
               </button>
+            ) : null}
+
+            {mode === "detail" && task?.isRoutine ? (
               <button
-                type="submit"
-                disabled={isProcessingImage}
-                className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                type="button"
+                onClick={() => void onEndRoutine(task)}
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-blue-50"
               >
-                {t("saveTask")}
+                {t("endRoutineTask")}
               </button>
+            ) : null}
+
+            <div className="sticky bottom-0 -mx-5 bg-blue-50/95 px-5 pb-2 pt-3 backdrop-blur">
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
+                >
+                  {t("cancel")}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isProcessingImage}
+                  className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {t("saveTask")}
+                </button>
+              </div>
             </div>
           </form>
         )}
