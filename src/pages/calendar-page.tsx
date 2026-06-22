@@ -6,7 +6,7 @@ import { CalendarGrid } from "@/components/calendar-grid";
 import { TaskCard } from "@/components/task-card";
 import { useAppStore } from "@/store/use-app-store";
 import { buildCalendarSeverity, resolveTasksForDate, resolveTasksForMonth } from "@/utils/task-logic";
-import { parseStorageDate } from "@/utils/date";
+import { parseStorageDate, todayStorageDate } from "@/utils/date";
 
 export default function CalendarPage() {
   const { t } = useTranslation();
@@ -32,6 +32,7 @@ export default function CalendarPage() {
   );
   const monthTasks = useMemo(() => resolveTasksForMonth(snapshot, parseStorageDate(currentMonth)), [snapshot, currentMonth]);
   const selectedTasks = useMemo(() => resolveTasksForDate(snapshot, selectedDate), [snapshot, selectedDate]);
+  const isSelectedToday = selectedDate === todayStorageDate();
 
   const severityByDate = useMemo(() => {
     return monthTasks.reduce<Record<string, ReturnType<typeof buildCalendarSeverity>>>((result, task) => {
@@ -82,7 +83,15 @@ export default function CalendarPage() {
       </section>
 
       <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3">
-        <h2 className="text-base font-semibold text-slate-900">{selectedDate}</h2>
+        <h2
+          className={
+            isSelectedToday
+              ? "text-base font-extrabold text-slate-950"
+              : "text-base font-semibold text-slate-900"
+          }
+        >
+          {selectedDate}
+        </h2>
 
         {selectedTasks.length === 0 ? (
           <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">

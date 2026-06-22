@@ -92,15 +92,15 @@ export default function ListPage() {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[32px] border border-blue-100 bg-blue-50/70 p-2">
-        <div className="grid grid-cols-2 gap-2">
+      <section className="h-12 rounded-[32px] border border-blue-100 bg-blue-50/70 p-1">
+        <div className="grid h-full grid-cols-2 gap-2">
           <button
             type="button"
             onClick={() => setActiveTab("outstanding")}
             className={
               activeTab === "outstanding"
-                ? "rounded-[24px] bg-blue-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-900/15"
-                : "rounded-[24px] bg-white px-4 py-3 text-sm font-semibold text-slate-600"
+                ? "inline-flex h-full items-center justify-center rounded-[24px] bg-blue-700 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-900/15"
+                : "inline-flex h-full items-center justify-center rounded-[24px] bg-white px-4 text-sm font-semibold text-slate-600"
             }
           >
             {t("outstanding")} ({sections.outstanding.length})
@@ -110,8 +110,8 @@ export default function ListPage() {
             onClick={() => setActiveTab("todo")}
             className={
               activeTab === "todo"
-                ? "rounded-[24px] bg-blue-700 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-900/15"
-                : "rounded-[24px] bg-white px-4 py-3 text-sm font-semibold text-slate-600"
+                ? "inline-flex h-full items-center justify-center rounded-[24px] bg-blue-700 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-900/15"
+                : "inline-flex h-full items-center justify-center rounded-[24px] bg-white px-4 text-sm font-semibold text-slate-600"
             }
           >
             {t("todo")} ({sections.todo.length})

@@ -73,23 +73,28 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="space-y-3">
-      <h1 className="text-base font-semibold text-slate-900">{t("restaurantMenu")}</h1>
+    <div className="space-y-2">
+      <div className="flex h-12 items-center">
+        <h1 className="text-base font-semibold text-slate-900">{t("restaurantMenu")}</h1>
+      </div>
 
-      <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3">
-        <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4 rounded-[28px] border border-blue-100 bg-white p-4">
+      <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3 pt-0.5">
+        <form
+          onSubmit={(event) => void handleSubmit(event)}
+          className="space-y-3 rounded-[28px] border border-blue-100 bg-white p-3"
+        >
           <label className="block space-y-2">
             <input
               value={restaurantName}
               onChange={(event) => setRestaurantName(event.target.value)}
               placeholder={t("restaurantNamePlaceholder")}
-              className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
+              className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-400"
             />
           </label>
 
-          <div className="space-y-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("qrCode")}</span>
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-blue-50/60 px-4 py-5 text-sm font-medium text-slate-700">
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{t("qrCode")}</span>
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-blue-50/60 px-4 py-4 text-sm font-medium text-slate-700">
               <Camera className="h-4 w-4" />
               <span>{isProcessingImage ? `${t("uploadQrCode")}...` : t("uploadQrCode")}</span>
               <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
@@ -102,7 +107,7 @@ export default function MenuPage() {
                 onClick={() => setPreviewImage({ src: qrCodeImage, alt: t("qrCode") })}
                 className="block w-full"
               >
-                <img src={qrCodeImage} alt={t("qrCode")} className="h-28 w-full rounded-2xl bg-slate-50 p-3 object-contain cursor-zoom-in" />
+                <img src={qrCodeImage} alt={t("qrCode")} className="h-24 w-full rounded-2xl bg-slate-50 p-3 object-contain cursor-zoom-in" />
               </button>
             ) : null}
           </div>
@@ -110,7 +115,7 @@ export default function MenuPage() {
           <button
             type="submit"
             disabled={!restaurantName.trim() || !qrCodeImage || isProcessingImage}
-            className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+            className="w-full rounded-2xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
           >
             {t("saveMenu")}
           </button>
@@ -121,9 +126,9 @@ export default function MenuPage() {
             {t("noMenuItems")}
           </div>
         ) : (
-          <section className="space-y-3">
+          <section className="space-y-2.5">
             {sortedItems.map((item) => (
-              <article key={item.id} className="rounded-[28px] border border-slate-100 bg-white p-4 shadow-sm shadow-blue-900/5">
+              <article key={item.id} className="rounded-[28px] border border-slate-100 bg-white p-3 shadow-sm shadow-blue-900/5">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Store className="h-4 w-4 text-slate-400" />
@@ -141,12 +146,12 @@ export default function MenuPage() {
                 <button
                   type="button"
                   onClick={() => setPreviewImage({ src: item.qrCodeImage, alt: `${item.restaurantName} QR Code` })}
-                  className="mt-4 block w-full"
+                  className="mt-3 block w-full"
                 >
                   <img
                     src={item.qrCodeImage}
                     alt={`${item.restaurantName} QR Code`}
-                    className="h-44 w-full rounded-2xl bg-slate-50 p-3 object-contain cursor-zoom-in"
+                    className="h-36 w-full rounded-2xl bg-slate-50 p-3 object-contain cursor-zoom-in"
                   />
                 </button>
               </article>

@@ -1,5 +1,5 @@
 import { CalendarDays, CheckCircle2, ListChecks, ListTodo, Menu, Plus, Settings2, Tags, UtensilsCrossed, X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -37,6 +37,8 @@ export function MobileShell() {
     deleteTask,
     endRoutineTask,
   } = useAppStore();
+  const shellOverlayHistoryActiveRef = useRef(false);
+  const shellOverlayClosingFromHistoryRef = useRef(false);
 
   useEffect(() => {
     const shouldLock = menuExpanded || Boolean(editorMode);
@@ -56,6 +58,47 @@ export function MobileShell() {
       document.body.style.overscrollBehaviorY = previousBodyOverscroll;
     };
   }, [editorMode, menuExpanded]);
+
+  useEffect(() => {
+    const hasOverlay = menuExpanded || Boolean(editorMode);
+
+    function handlePopState() {
+      shellOverlayClosingFromHistoryRef.current = true;
+
+      if (editorMode) {
+        closeSheet();
+        return;
+      }
+
+      if (menuExpanded) {
+        toggleMenu();
+      }
+    }
+
+    if (hasOverlay && !shellOverlayHistoryActiveRef.current) {
+      window.history.pushState({ overlay: "shell" }, "", window.location.href);
+      shellOverlayHistoryActiveRef.current = true;
+    }
+
+    if (hasOverlay) {
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+
+    if (shellOverlayHistoryActiveRef.current) {
+      if (shellOverlayClosingFromHistoryRef.current) {
+        shellOverlayClosingFromHistoryRef.current = false;
+        shellOverlayHistoryActiveRef.current = false;
+        return;
+      }
+
+      shellOverlayHistoryActiveRef.current = false;
+      window.history.back();
+    }
+  }, [closeSheet, editorMode, menuExpanded, toggleMenu]);
 
   const shouldShowFab = !["/checklist", "/menu", "/settings"].includes(location.pathname);
 

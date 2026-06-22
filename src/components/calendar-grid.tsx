@@ -59,9 +59,11 @@ export function CalendarGrid({ month, selectedDate, severityByDate, onSelectDate
                 severityStyles[severity],
                 isSameMonth(day, monthDate) ? "border-transparent" : "border-slate-100 text-slate-300",
                 isSelected && "ring-2 ring-blue-700 ring-offset-2 ring-offset-blue-50",
+                !isSelected && isToday && "ring-2 ring-slate-900/40 ring-offset-2 ring-offset-blue-50",
+                isToday && "shadow-sm shadow-slate-900/10",
               )}
             >
-              <span className={cn("font-semibold", isToday && "text-slate-900")}>{format(day, "d")}</span>
+              <span className={cn("font-semibold", isToday && "font-extrabold text-slate-950")}>{format(day, "d")}</span>
             </button>
           );
         })}

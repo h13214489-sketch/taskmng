@@ -46,15 +46,15 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
+    <div className="space-y-2">
+      <div className="flex h-12 items-center justify-between">
         <h1 className="text-base font-semibold text-slate-900">{t("settings")}</h1>
       </div>
 
-      <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-4 rounded-[32px] border border-blue-100 bg-blue-50/70 p-4">
-        <div className="space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{t("language")}</p>
-          <div className="grid grid-cols-2 gap-3">
+      <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3 rounded-[32px] border border-blue-100 bg-blue-50/70 p-3">
+        <div className="space-y-1.5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{t("language")}</p>
+          <div className="grid grid-cols-2 gap-2">
             {[
               { value: "en" as const, label: "English" },
               { value: "zh" as const, label: "中文" },
@@ -63,7 +63,7 @@ export default function SettingsPage() {
                 key={option.value}
                 type="button"
                 onClick={() => void handleLanguageChange(option.value)}
-                className={`rounded-2xl px-4 py-3 text-sm font-semibold ${
+                className={`rounded-2xl px-4 py-2.5 text-sm font-semibold ${
                   settings.language === option.value
                     ? "bg-blue-700 text-white"
                     : "border border-blue-100 bg-white text-slate-700"
@@ -75,7 +75,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-4">
+        <div className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3">
           <div className="flex items-center gap-3">
             <BellRing className="h-5 w-5 text-blue-500" />
             <div>
@@ -101,23 +101,23 @@ export default function SettingsPage() {
           </button>
         </div>
 
-        <p className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-xs text-slate-500">
+        <p className="rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-xs text-slate-500">
           {t("notificationFormat", { count: 3 })}
         </p>
 
         {notificationError ? (
-          <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-xs text-rose-600">
+          <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-2.5 text-xs text-rose-600">
             {notificationError}
           </p>
         ) : null}
 
-        <label className="block space-y-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{t("reminderTime")}</span>
+        <label className="block space-y-1.5">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{t("reminderTime")}</span>
           <input
             type="time"
             value={settings.dailyReminderTime}
             onChange={(event) => void updateSettings({ dailyReminderTime: event.target.value })}
-            className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-400"
+            className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-400"
           />
         </label>
       </section>

@@ -37,6 +37,8 @@ export function ImageLightbox({ open, src, alt, onClose }: ImageLightboxProps) {
     center: { x: number; y: number };
     offset: { x: number; y: number };
   } | null>(null);
+  const lightboxHistoryActiveRef = useRef(false);
+  const lightboxClosingFromHistoryRef = useRef(false);
 
   const safeScale = useMemo(() => clamp(scale, MIN_SCALE, MAX_SCALE), [scale]);
 
@@ -77,6 +79,37 @@ export function ImageLightbox({ open, src, alt, onClose }: ImageLightboxProps) {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, open]);
+
+  useEffect(() => {
+    function handlePopState() {
+      lightboxClosingFromHistoryRef.current = true;
+      onClose();
+    }
+
+    if (open && !lightboxHistoryActiveRef.current) {
+      window.history.pushState({ overlay: "lightbox" }, "", window.location.href);
+      lightboxHistoryActiveRef.current = true;
+    }
+
+    if (open) {
+      window.addEventListener("popstate", handlePopState);
+
+      return () => {
+        window.removeEventListener("popstate", handlePopState);
+      };
+    }
+
+    if (lightboxHistoryActiveRef.current) {
+      if (lightboxClosingFromHistoryRef.current) {
+        lightboxClosingFromHistoryRef.current = false;
+        lightboxHistoryActiveRef.current = false;
+        return;
+      }
+
+      lightboxHistoryActiveRef.current = false;
+      window.history.back();
+    }
   }, [onClose, open]);
 
   if (!open) {

@@ -52,24 +52,21 @@ export default function ChecklistPage() {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[30px] border border-blue-100 bg-white/90 p-4 shadow-sm shadow-blue-900/5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
-            {selectionMode ? (
-              <>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{t("manage")}</p>
-                <h1 className="text-lg font-semibold text-slate-900">{t("checkList")}</h1>
-              </>
-            ) : (
-              <>
-                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-500">{t("checkList")}</p>
-                <h1 className="text-lg font-semibold text-slate-900">{t("checkList")}</h1>
-              </>
-            )}
+      <section className="rounded-[30px] border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-900/5">
+        <div className="flex items-center gap-2">
+          <div className="grid min-w-0 flex-1 grid-cols-2 gap-2">
+            <div className="rounded-[22px] bg-blue-50 px-3 py-2.5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-500">{t("todo")}</p>
+              <p className="mt-0.5 text-lg font-semibold text-slate-900">{remainingCount}</p>
+            </div>
+            <div className="rounded-[22px] bg-emerald-50 px-3 py-2.5">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600">{t("complete")}</p>
+              <p className="mt-0.5 text-lg font-semibold text-slate-900">{completedCount}</p>
+            </div>
           </div>
 
           {selectionMode ? (
-            <div className="flex items-center gap-2">
+            <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -86,8 +83,10 @@ export default function ChecklistPage() {
                 onClick={() => void handleDeleteSelected()}
                 disabled={selectedIds.length === 0}
                 className={cn(
-                  "rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition",
-                  selectedIds.length === 0 && "cursor-not-allowed bg-slate-200 text-slate-500",
+                  "rounded-2xl px-3 py-2.5 text-sm font-semibold transition",
+                  selectedIds.length === 0
+                    ? "cursor-not-allowed bg-slate-200 text-slate-500"
+                    : "bg-slate-900 text-white",
                 )}
               >
                 {t("delete")} ({selectedIds.length})
@@ -100,23 +99,12 @@ export default function ChecklistPage() {
                 setSelectionMode(true);
                 setSelectedIds([]);
               }}
-              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
               aria-label={t("manage")}
             >
               <MoreHorizontal className="h-5 w-5" />
             </button>
           )}
-        </div>
-
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded-[24px] bg-blue-50 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-500">{t("todo")}</p>
-            <p className="mt-1 text-xl font-semibold text-slate-900">{remainingCount}</p>
-          </div>
-          <div className="rounded-[24px] bg-emerald-50 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-600">{t("complete")}</p>
-            <p className="mt-1 text-xl font-semibold text-slate-900">{completedCount}</p>
-          </div>
         </div>
       </section>
 
