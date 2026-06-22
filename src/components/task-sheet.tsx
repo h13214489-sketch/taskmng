@@ -224,9 +224,7 @@ export function TaskSheet({
 
             <div className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("uploadRecord")}</span>
-              <input id={completionInputId} type="file" accept="image/*" className="sr-only" onChange={handleFileChange} disabled={isProcessingImage} />
               <label
-                htmlFor={completionInputId}
                 className={cn(
                   "flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50",
                   isProcessingImage && "cursor-not-allowed opacity-60",
@@ -234,6 +232,14 @@ export function TaskSheet({
               >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("uploadRecord")}...` : t("uploadRecord")}</span>
+                <input
+                  key={completionInputId}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  disabled={isProcessingImage}
+                />
               </label>
               <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
               {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
@@ -336,9 +342,7 @@ export function TaskSheet({
             </div>
 
             <div className="space-y-1.5">
-              <input id={photoInputId} type="file" accept="image/*" className="sr-only" onChange={handleFileChange} disabled={isProcessingImage} />
               <label
-                htmlFor={photoInputId}
                 className={cn(
                   "flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-4 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50",
                   isProcessingImage && "cursor-not-allowed opacity-60",
@@ -346,6 +350,14 @@ export function TaskSheet({
               >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("photoUpload")}...` : t("photoUpload")}</span>
+                <input
+                  key={photoInputId}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  disabled={isProcessingImage}
+                />
               </label>
               <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
               {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
