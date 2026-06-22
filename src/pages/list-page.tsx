@@ -62,7 +62,7 @@ export default function ListPage() {
   const { series, occurrences, checklistItems, menuItems, tags, settings } = useAppStore();
   const [outstandingCount, setOutstandingCount] = useState(PAGE_SIZE);
   const [todoCount, setTodoCount] = useState(PAGE_SIZE);
-  const [activeTab, setActiveTab] = useState<"outstanding" | "todo">("outstanding");
+  const [activeTab, setActiveTab] = useState<"outstanding" | "todo">("todo");
   const [query, setQuery] = useState("");
 
   const snapshot = useMemo(
@@ -96,17 +96,6 @@ export default function ListPage() {
         <div className="grid h-full grid-cols-2 gap-2">
           <button
             type="button"
-            onClick={() => setActiveTab("outstanding")}
-            className={
-              activeTab === "outstanding"
-                ? "inline-flex h-full items-center justify-center rounded-[24px] bg-blue-700 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-900/15"
-                : "inline-flex h-full items-center justify-center rounded-[24px] bg-white px-4 text-sm font-semibold text-slate-600"
-            }
-          >
-            {t("outstanding")} ({sections.outstanding.length})
-          </button>
-          <button
-            type="button"
             onClick={() => setActiveTab("todo")}
             className={
               activeTab === "todo"
@@ -115,6 +104,17 @@ export default function ListPage() {
             }
           >
             {t("todo")} ({sections.todo.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("outstanding")}
+            className={
+              activeTab === "outstanding"
+                ? "inline-flex h-full items-center justify-center rounded-[24px] bg-blue-700 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-900/15"
+                : "inline-flex h-full items-center justify-center rounded-[24px] bg-white px-4 text-sm font-semibold text-slate-600"
+            }
+          >
+            {t("outstanding")} ({sections.outstanding.length})
           </button>
         </div>
       </section>

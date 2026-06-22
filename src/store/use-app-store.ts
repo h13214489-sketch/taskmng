@@ -37,6 +37,7 @@ interface AppStore extends AppSnapshot {
   openCompleteSheet: (task: ResolvedTask) => void;
   closeSheet: () => void;
   addTask: (input: AddTaskInput) => Promise<void>;
+  updateTask: (task: ResolvedTask, input: AddTaskInput) => Promise<void>;
   setTaskStatus: (task: ResolvedTask, status: TaskOccurrence["status"], completionPhoto?: string) => Promise<void>;
   deleteTask: (task: ResolvedTask) => Promise<void>;
   endRoutineTask: (task: ResolvedTask) => Promise<void>;
@@ -79,6 +80,21 @@ function createSeriesFromInput(input: AddTaskInput): TaskSeries {
     isMustDo: input.isMustDo,
     tagIds: input.tagIds,
     createdAt: Date.now(),
+  };
+}
+
+function updateSeriesFromInput(series: TaskSeries, input: AddTaskInput): TaskSeries {
+  const parsedDate = parseDisplayDate(input.deadline);
+  return {
+    ...series,
+    name: input.name.trim(),
+    detail: input.detail.trim(),
+    photo: input.photo,
+    startDate: toStorageDate(parsedDate),
+    deadlineDay: parsedDate.getDate(),
+    isRoutine: input.isRoutine,
+    isMustDo: input.isMustDo,
+    tagIds: input.tagIds,
   };
 }
 
@@ -192,6 +208,40 @@ export const useAppStore = create<AppStore>((set, get) => ({
       occurrences: [...state.occurrences, occurrence],
       selectedDate: series.startDate,
       currentMonth: series.startDate,
+      editorMode: null,
+      editorTask: null,
+    }));
+  },
+
+  async updateTask(task, input) {
+    const series = get().series.find((item) => item.id === task.seriesId);
+    if (!series) {
+      return;
+    }
+
+    const updatedSeries = updateSeriesFromInput(series, input);
+    const nextSelectedDate = updatedSeries.isRoutine ? get().selectedDate : updatedSeries.startDate;
+
+    const shouldMoveOccurrence = !series.isRoutine && !updatedSeries.isRoutine && series.startDate !== updatedSeries.startDate;
+    const existingOccurrenceToMove = shouldMoveOccurrence
+      ? get().occurrences.find((item) => item.seriesId === series.id && item.date === series.startDate)
+      : undefined;
+    const movedOccurrence = existingOccurrenceToMove ? { ...existingOccurrenceToMove, date: updatedSeries.startDate } : undefined;
+
+    await db.transaction("rw", db.taskSeries, db.taskOccurrences, async () => {
+      await db.taskSeries.put(updatedSeries);
+      if (movedOccurrence) {
+        await db.taskOccurrences.put(movedOccurrence);
+      }
+    });
+
+    set((state) => ({
+      series: state.series.map((item) => (item.id === updatedSeries.id ? updatedSeries : item)),
+      occurrences: movedOccurrence
+        ? state.occurrences.map((item) => (item.id === movedOccurrence.id ? movedOccurrence : item))
+        : state.occurrences,
+      selectedDate: nextSelectedDate,
+      currentMonth: nextSelectedDate,
       editorMode: null,
       editorTask: null,
     }));

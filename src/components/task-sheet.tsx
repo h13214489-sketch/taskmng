@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Camera, Trash2, X } from "lucide-react";
+import { Camera, Pencil, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { ImageLightbox } from "@/components/image-lightbox";
@@ -16,6 +16,7 @@ interface TaskSheetProps {
   selectedDate: string;
   onClose: () => void;
   onSave: (input: AddTaskInput) => Promise<void>;
+  onUpdate: (task: ResolvedTask, input: AddTaskInput) => Promise<void>;
   onConfirmComplete: (task: ResolvedTask, completionPhoto?: string) => Promise<void>;
   onDelete: (task: ResolvedTask) => Promise<void>;
   onEndRoutine: (task: ResolvedTask) => Promise<void>;
@@ -31,6 +32,7 @@ export function TaskSheet({
   selectedDate,
   onClose,
   onSave,
+  onUpdate,
   onConfirmComplete,
   onDelete,
   onEndRoutine,
@@ -43,6 +45,7 @@ export function TaskSheet({
   const [isMustDo, setIsMustDo] = useState(false);
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [photo, setPhoto] = useState<string | undefined>();
+  const [isEditingDetail, setIsEditingDetail] = useState(false);
   const [previewImage, setPreviewImage] = useState<{ src: string; alt: string } | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
@@ -53,6 +56,7 @@ export function TaskSheet({
       return;
     }
 
+    setIsEditingDetail(false);
     setName("");
     setDetail("");
     setDeadline(toDisplayDate(selectedDate));
@@ -68,9 +72,30 @@ export function TaskSheet({
       return;
     }
 
+    setIsEditingDetail(false);
     setPhoto(undefined);
     setImageError(null);
   }, [mode, task?.seriesId, task?.date]);
+
+  useEffect(() => {
+    if (mode !== "detail" || !task) {
+      setIsEditingDetail(false);
+      return;
+    }
+
+    if (!isEditingDetail) {
+      return;
+    }
+
+    setName(task.name);
+    setDetail(task.detail);
+    setDeadline(toDisplayDate(task.date));
+    setIsRoutine(task.isRoutine);
+    setIsMustDo(task.isMustDo);
+    setTagIds(task.tagIds);
+    setPhoto(task.photo);
+    setImageError(null);
+  }, [isEditingDetail, mode, task]);
 
   const title = useMemo(() => {
     if (mode === "detail") {
@@ -108,7 +133,7 @@ export function TaskSheet({
     }
 
     try {
-      await onSave({
+      const payload: AddTaskInput = {
         name,
         detail,
         deadline,
@@ -116,7 +141,15 @@ export function TaskSheet({
         isMustDo,
         tagIds,
         photo,
-      });
+      };
+
+      if (mode === "detail" && task) {
+        await onUpdate(task, payload);
+        setIsEditingDetail(false);
+        return;
+      }
+
+      await onSave(payload);
       setImageError(null);
     } catch {
       setImageError(t("imageSaveFailed"));
@@ -163,16 +196,29 @@ export function TaskSheet({
           <div>
             <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-full border border-blue-100 bg-white p-2 text-slate-500 transition hover:border-blue-200"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {mode === "detail" && task && !isEditingDetail ? (
+              <button
+                type="button"
+                onClick={() => setIsEditingDetail(true)}
+                className="rounded-full border border-blue-100 bg-white p-2 text-slate-500 transition hover:border-blue-200"
+                aria-label={t("editTask")}
+              >
+                <Pencil className="h-5 w-5" />
+              </button>
+            ) : null}
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-blue-100 bg-white p-2 text-slate-500 transition hover:border-blue-200"
+              aria-label={t("close")}
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
-        {mode === "detail" && task ? (
+        {mode === "detail" && task && !isEditingDetail ? (
           <div className="space-y-4">
             <div className="rounded-[28px] border border-blue-100 bg-white p-4">
               <div className="flex items-center gap-2">
@@ -391,7 +437,13 @@ export function TaskSheet({
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 type="button"
-                onClick={onClose}
+                onClick={() => {
+                  if (mode === "detail") {
+                    setIsEditingDetail(false);
+                    return;
+                  }
+                  onClose();
+                }}
                 className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
               >
                 {t("cancel")}

@@ -31,6 +31,9 @@ export function ImageLightbox({ open, src, alt, onClose }: ImageLightboxProps) {
   const [scale, setScale] = useState(BASE_SCALE);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const [pointers, setPointers] = useState<Record<number, { x: number; y: number }>>({});
+  const [qrValue, setQrValue] = useState<string | null>(null);
+  const [qrError, setQrError] = useState<string | null>(null);
+  const [isScanningQr, setIsScanningQr] = useState(false);
   const [pinchStart, setPinchStart] = useState<{
     distance: number;
     scale: number;
@@ -64,6 +67,9 @@ export function ImageLightbox({ open, src, alt, onClose }: ImageLightboxProps) {
     setOffset({ x: 0, y: 0 });
     setPointers({});
     setPinchStart(null);
+    setQrValue(null);
+    setQrError(null);
+    setIsScanningQr(false);
   }, [open, src]);
 
   useEffect(() => {
@@ -142,6 +148,68 @@ export function ImageLightbox({ open, src, alt, onClose }: ImageLightboxProps) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  async function decodeQr() {
+    if (isScanningQr) {
+      return;
+    }
+
+    setIsScanningQr(true);
+    setQrValue(null);
+    setQrError(null);
+
+    try {
+      const BarcodeDetectorCtor = (window as unknown as { BarcodeDetector?: any }).BarcodeDetector;
+      if (!BarcodeDetectorCtor) {
+        setQrError(t("qrUnsupported"));
+        return;
+      }
+
+      const response = await fetch(src);
+      const blob = await response.blob();
+      const bitmap = await createImageBitmap(blob);
+      const detector = new BarcodeDetectorCtor({ formats: ["qr_code"] });
+      const results: Array<{ rawValue?: string }> = await detector.detect(bitmap);
+      const value = results[0]?.rawValue?.trim();
+
+      if (!value) {
+        setQrError(t("qrNotFound"));
+        return;
+      }
+
+      setQrValue(value);
+    } catch {
+      setQrError(t("qrScanFailed"));
+    } finally {
+      setIsScanningQr(false);
+    }
+  }
+
+  async function copyQrValue() {
+    if (!qrValue) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(qrValue);
+      setQrError(t("copied"));
+    } catch {
+      setQrError(qrValue);
+    }
+  }
+
+  function openQrLink() {
+    if (!qrValue) {
+      return;
+    }
+
+    if (/^https?:\/\//i.test(qrValue)) {
+      window.open(qrValue, "_blank", "noopener,noreferrer");
+      return;
+    }
+
+    setQrError(qrValue);
   }
 
   function clearPointer(pointerId: number) {
@@ -271,6 +339,11 @@ export function ImageLightbox({ open, src, alt, onClose }: ImageLightboxProps) {
               touchAction: "none",
               willChange: "transform",
             }}
+            onContextMenu={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void decodeQr();
+            }}
             onClick={(event) => {
               if (safeScale <= BASE_SCALE + 0.001) {
                 event.stopPropagation();
@@ -280,6 +353,51 @@ export function ImageLightbox({ open, src, alt, onClose }: ImageLightboxProps) {
           />
         </div>
       </div>
+      {qrValue || qrError ? (
+        <div className="fixed inset-x-0 bottom-0 z-20 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+          <div
+            className="mx-auto w-full max-w-[440px] rounded-[28px] border border-blue-100 bg-white/95 p-4 shadow-2xl shadow-slate-900/25 backdrop-blur"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{t("qrResult")}</p>
+                <p className="mt-2 break-words text-sm font-medium text-slate-900">{qrValue ?? qrError}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setQrValue(null);
+                  setQrError(null);
+                }}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
+                aria-label={t("close")}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {qrValue ? (
+              <div className="mt-4 grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => void copyQrValue()}
+                  className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-blue-50"
+                >
+                  {t("copyLink")}
+                </button>
+                <button
+                  type="button"
+                  onClick={openQrLink}
+                  className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
+                >
+                  {t("openLink")}
+                </button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
