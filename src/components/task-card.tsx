@@ -1,7 +1,6 @@
 import { Camera, CheckCheck, Clock3 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { TagChip } from "@/components/tag-chip";
 import { cn } from "@/lib/utils";
 import type { ResolvedTask, Tag } from "@/types/models";
 import { toDisplayDate } from "@/utils/date";
@@ -13,10 +12,9 @@ interface TaskCardProps {
   onPending: () => void;
   onSetTodo: () => void;
   onOpenDetail: () => void;
-  tagsBelowActions?: boolean;
 }
 
-export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenDetail, tagsBelowActions = false }: TaskCardProps) {
+export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenDetail }: TaskCardProps) {
   const { t } = useTranslation();
   const taskTags = tags.filter((tag) => task.tagIds.includes(tag.id));
 
@@ -32,7 +30,7 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
       }}
       className={cn(
         "cursor-pointer rounded-[28px] border border-blue-100 bg-white p-4 shadow-sm shadow-blue-900/5",
-        task.status === "pending" && "border-emerald-200 bg-emerald-50/80 shadow-emerald-900/5",
+        task.status === "pending" && "border-slate-200 bg-slate-100/90 shadow-slate-900/5",
         task.status === "complete" && "border-slate-200 bg-slate-50/80",
       )}
     >
@@ -47,52 +45,18 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
             {t("deadline")}: {toDisplayDate(task.date)}
           </p>
         </div>
-        <div className={cn("flex items-center gap-2", tagsBelowActions && "flex-col items-end gap-1.5")}>
-          {task.status === "pending" ? (
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                onSetTodo();
-              }}
-              className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-700"
-            >
-              {t("pending")}
-            </button>
-          ) : (
-            <div
-              className={cn(
-                "rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]",
-                task.status === "complete" ? "bg-slate-200 text-slate-600" : "bg-slate-100 text-slate-500",
-              )}
-            >
-              {task.status === "complete" ? t("complete") : t("todo")}
-            </div>
-          )}
-
-          {tagsBelowActions ? (
-            <div className="flex max-w-[9rem] flex-wrap justify-end gap-1.5">
-              {taskTags.map((tag) => (
-                <div
-                  key={tag.id}
-                  className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-white px-2 py-1 text-[10px] font-medium text-slate-600"
-                >
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: tag.color }} />
-                  <span className="truncate">{tag.name}</span>
-                </div>
-              ))}
-            </div>
-          ) : null}
-        </div>
-      </div>
-
-      {!tagsBelowActions ? (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="flex max-w-[9rem] flex-wrap justify-end gap-1.5">
           {taskTags.map((tag) => (
-            <TagChip key={tag.id} label={tag.name} color={tag.color} />
+            <div
+              key={tag.id}
+              className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-white px-2 py-1 text-[10px] font-medium text-slate-600"
+            >
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: tag.color }} />
+              <span className="truncate">{tag.name}</span>
+            </div>
           ))}
         </div>
-      ) : null}
+      </div>
 
       {task.status === "complete" ? (
         <div className="mt-4">
