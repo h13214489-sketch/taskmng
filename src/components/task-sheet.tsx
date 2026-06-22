@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { ImageLightbox } from "@/components/image-lightbox";
 import { TagChip } from "@/components/tag-chip";
+import { cn } from "@/lib/utils";
 import type { AddTaskInput, ResolvedTask, Tag } from "@/types/models";
 import { toDisplayDate } from "@/utils/date";
 import { ImageUploadError, type ImageUploadErrorCode, optimizeImageFile } from "@/utils/image";
@@ -21,8 +22,6 @@ interface TaskSheetProps {
   onDelete: (task: ResolvedTask) => Promise<void>;
   onEndRoutine: (task: ResolvedTask) => Promise<void>;
 }
-
-const defaultColors = ["#bfdbfe", "#93c5fd", "#60a5fa", "#3b82f6", "#2563eb", "#1d4ed8"];
 
 export function TaskSheet({
   open,
@@ -178,7 +177,12 @@ export function TaskSheet({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-slate-900/50 backdrop-blur-sm">
-      <section className="max-h-[92vh] w-full overflow-y-auto rounded-t-[32px] bg-blue-50 px-5 pb-4 pt-4 shadow-2xl shadow-blue-900/20">
+      <section
+        className={cn(
+          "w-full overflow-y-auto bg-blue-50 px-5 pb-4 pt-4 shadow-2xl shadow-blue-900/20",
+          mode === "create" ? "h-screen rounded-none" : "max-h-[92vh] rounded-t-[32px]",
+        )}
+      >
         <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" />
         {mode !== "create" ? (
           <div className="mb-3 flex items-center justify-between gap-4">
@@ -407,14 +411,6 @@ export function TaskSheet({
             </div>
           </form>
         )}
-
-        {mode === "create" ? (
-          <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
-            {defaultColors.map((color) => (
-              <span key={color} className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
-            ))}
-          </div>
-        ) : null}
       </section>
       {previewImage ? <ImageLightbox open={true} src={previewImage.src} alt={previewImage.alt} onClose={() => setPreviewImage(null)} /> : null}
     </div>
