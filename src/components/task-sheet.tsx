@@ -180,29 +180,31 @@ export function TaskSheet({
     <div className="fixed inset-0 z-50 flex items-end bg-slate-900/50 backdrop-blur-sm">
       <section className="max-h-[92vh] w-full overflow-y-auto rounded-t-[32px] bg-blue-50 px-5 pb-4 pt-4 shadow-2xl shadow-blue-900/20">
         <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" />
-        <div className="mb-3 flex items-center justify-between gap-4">
-          {mode === "detail" ? <div /> : <h2 className="text-lg font-semibold text-slate-900">{title}</h2>}
-          <div className="flex items-center gap-2">
-            {mode === "detail" && task ? (
+        {mode !== "create" ? (
+          <div className="mb-3 flex items-center justify-between gap-4">
+            {mode === "detail" ? <div /> : <h2 className="text-lg font-semibold text-slate-900">{title}</h2>}
+            <div className="flex items-center gap-2">
+              {mode === "detail" && task ? (
+                <button
+                  type="button"
+                  onClick={() => void onDelete(task)}
+                  className="rounded-full border border-rose-200 bg-rose-50 p-2 text-rose-600 transition hover:border-rose-300"
+                  aria-label={t("delete")}
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              ) : null}
               <button
                 type="button"
-                onClick={() => void onDelete(task)}
-                className="rounded-full border border-rose-200 bg-rose-50 p-2 text-rose-600 transition hover:border-rose-300"
-                aria-label={t("delete")}
+                onClick={onClose}
+                className="rounded-full border border-blue-100 bg-white p-2 text-slate-500 transition hover:border-blue-200"
+                aria-label={t("close")}
               >
-                <Trash2 className="h-5 w-5" />
+                <X className="h-5 w-5" />
               </button>
-            ) : null}
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-full border border-blue-100 bg-white p-2 text-slate-500 transition hover:border-blue-200"
-              aria-label={t("close")}
-            >
-              <X className="h-5 w-5" />
-            </button>
+            </div>
           </div>
-        </div>
+        ) : null}
 
         {mode === "complete" && task ? (
           <div className="space-y-4">
