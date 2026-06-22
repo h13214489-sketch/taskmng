@@ -62,17 +62,6 @@ export function CalendarGrid({ month, selectedDate, severityByDate, onSelectDate
               )}
             >
               <span className={cn("font-semibold", isToday && "text-slate-900")}>{format(day, "d")}</span>
-              {severity !== "none" ? (
-                <span
-                  className={cn(
-                    "absolute bottom-2 left-2 h-2.5 w-2.5 rounded-full",
-                    severity === "low" && "bg-sky-500",
-                    severity === "medium" && "bg-blue-500",
-                    severity === "high" && "bg-indigo-600",
-                    severity === "overdue" && "bg-rose-500",
-                  )}
-                />
-              ) : null}
             </button>
           );
         })}

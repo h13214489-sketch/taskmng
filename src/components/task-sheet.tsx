@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Camera, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -46,6 +46,7 @@ export function TaskSheet({
   const [previewImage, setPreviewImage] = useState<{ src: string; alt: string } | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (mode !== "create") {
@@ -146,6 +147,14 @@ export function TaskSheet({
     }
   }
 
+  function openFilePicker() {
+    if (isProcessingImage) {
+      return;
+    }
+
+    fileInputRef.current?.click();
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-slate-900/50 backdrop-blur-sm">
       <section className="max-h-[90vh] w-full overflow-y-auto rounded-t-[32px] bg-blue-50 px-5 pb-8 pt-5 shadow-2xl shadow-blue-900/20">
@@ -243,11 +252,24 @@ export function TaskSheet({
 
             <div className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("uploadRecord")}</span>
-              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={handleFileChange}
+                disabled={isProcessingImage}
+                tabIndex={-1}
+              />
+              <button
+                type="button"
+                onClick={openFilePicker}
+                disabled={isProcessingImage}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("uploadRecord")}...` : t("uploadRecord")}</span>
-                <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
-              </label>
+              </button>
               <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
               {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
             </div>
@@ -342,11 +364,24 @@ export function TaskSheet({
 
             <div className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("photoUpload")}</span>
-              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={handleFileChange}
+                disabled={isProcessingImage}
+                tabIndex={-1}
+              />
+              <button
+                type="button"
+                onClick={openFilePicker}
+                disabled={isProcessingImage}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("photoUpload")}...` : t("photoUpload")}</span>
-                <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
-              </label>
+              </button>
               <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
               {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
               {photo ? (

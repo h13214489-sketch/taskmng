@@ -22,6 +22,8 @@ export default function ChecklistPage() {
       return left.createdAt - right.createdAt;
     });
   }, [checklistItems]);
+  const completedCount = sortedItems.filter((item) => item.completed).length;
+  const remainingCount = sortedItems.length - completedCount;
 
   function toggleSelected(itemId: string) {
     setSelectedIds((current) => (current.includes(itemId) ? current.filter((id) => id !== itemId) : [...current, itemId]));
@@ -49,55 +51,79 @@ export default function ChecklistPage() {
   }
 
   return (
-    <div className="space-y-3">
-      <div className="relative flex items-center justify-between gap-3">
-        {selectionMode ? (
-          <button
-            type="button"
-            onClick={() => {
-              setSelectionMode(false);
-              setSelectedIds([]);
-            }}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700"
-          >
-            <X className="h-4 w-4" />
-            {t("cancel")}
-          </button>
-        ) : (
-          <h1 className="text-base font-semibold text-slate-900">{t("checkList")}</h1>
-        )}
-
-        {selectionMode ? (
-          <button
-            type="button"
-            onClick={() => void handleDeleteSelected()}
-            disabled={selectedIds.length === 0}
-            className={cn(
-              "rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition",
-              selectedIds.length === 0 && "cursor-not-allowed bg-slate-200 text-slate-500",
+    <div className="space-y-4">
+      <section className="rounded-[30px] border border-blue-100 bg-white/90 p-4 shadow-sm shadow-blue-900/5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="space-y-1">
+            {selectionMode ? (
+              <>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{t("manage")}</p>
+                <h1 className="text-lg font-semibold text-slate-900">{t("checkList")}</h1>
+              </>
+            ) : (
+              <>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-500">{t("checkList")}</p>
+                <h1 className="text-lg font-semibold text-slate-900">{t("checkList")}</h1>
+              </>
             )}
-          >
-            {t("delete")} ({selectedIds.length})
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setSelectionMode(true);
-              setSelectedIds([]);
-            }}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-blue-100 bg-white text-slate-600 transition hover:bg-blue-50"
-            aria-label={t("manage")}
-          >
-            <MoreHorizontal className="h-5 w-5" />
-          </button>
-        )}
-      </div>
+          </div>
+
+          {selectionMode ? (
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectionMode(false);
+                  setSelectedIds([]);
+                }}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
+                aria-label={t("cancel")}
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleDeleteSelected()}
+                disabled={selectedIds.length === 0}
+                className={cn(
+                  "rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition",
+                  selectedIds.length === 0 && "cursor-not-allowed bg-slate-200 text-slate-500",
+                )}
+              >
+                {t("delete")} ({selectedIds.length})
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setSelectionMode(true);
+                setSelectedIds([]);
+              }}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
+              aria-label={t("manage")}
+            >
+              <MoreHorizontal className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="rounded-[24px] bg-blue-50 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-500">{t("todo")}</p>
+            <p className="mt-1 text-xl font-semibold text-slate-900">{remainingCount}</p>
+          </div>
+          <div className="rounded-[24px] bg-emerald-50 px-4 py-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-600">{t("complete")}</p>
+            <p className="mt-1 text-xl font-semibold text-slate-900">{completedCount}</p>
+          </div>
+        </div>
+      </section>
 
       <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3">
         <form
           onSubmit={(event) => void handleSubmit(event)}
-          className="flex items-center gap-3 rounded-[28px] border border-blue-100 bg-white px-4 py-3"
+          className="flex items-center gap-3 rounded-[28px] border border-blue-100 bg-white px-4 py-3 shadow-sm shadow-blue-900/5"
         >
           <input
             value={title}
@@ -122,7 +148,7 @@ export default function ChecklistPage() {
             {t("noCheckListItems")}
           </div>
         ) : (
-          <section className="space-y-2">
+          <section className="space-y-3">
             {sortedItems.map((item) => (
               <div
                 key={item.id}
@@ -145,22 +171,29 @@ export default function ChecklistPage() {
                     : undefined
                 }
                 className={cn(
-                  "flex items-center justify-between gap-4 rounded-[28px] border border-slate-100 bg-white px-4 py-4 shadow-sm shadow-blue-900/5",
+                  "flex items-center justify-between gap-4 rounded-[28px] border border-slate-100 bg-white px-4 py-4 shadow-sm shadow-blue-900/5 transition",
+                  item.completed && "border-emerald-100 bg-emerald-50/50",
+                  !item.completed && "hover:border-blue-200 hover:bg-blue-50/40",
                   selectionMode && "cursor-pointer",
                 )}
               >
-                <span
-                  className={cn(
-                    "text-sm font-medium text-slate-900",
-                    item.completed && "text-slate-400 line-through",
-                  )}
-                >
-                  {item.title}
-                </span>
+                <div className="min-w-0 flex-1">
+                  <p
+                    className={cn(
+                      "text-sm font-medium text-slate-900",
+                      item.completed && "text-slate-400 line-through",
+                    )}
+                  >
+                    {item.title}
+                  </p>
+                  <p className={cn("mt-1 text-xs font-medium", item.completed ? "text-emerald-600" : "text-slate-400")}>
+                    {item.completed ? t("complete") : t("todo")}
+                  </p>
+                </div>
                 {selectionMode ? (
                   <div
                     className={cn(
-                      "inline-flex h-10 w-10 items-center justify-center rounded-full border transition",
+                      "inline-flex h-11 w-11 items-center justify-center rounded-2xl border transition",
                       selectedIds.includes(item.id)
                         ? "border-slate-900 bg-slate-900 text-white"
                         : "border-slate-300 bg-white text-slate-500",
@@ -173,7 +206,7 @@ export default function ChecklistPage() {
                     type="button"
                     onClick={() => void toggleChecklistItem(item.id)}
                     className={cn(
-                      "inline-flex h-10 w-10 items-center justify-center rounded-full border transition",
+                      "inline-flex h-11 w-11 items-center justify-center rounded-2xl border transition",
                       item.completed ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-500",
                     )}
                     aria-label={item.completed ? t("complete") : t("todo")}
