@@ -7,7 +7,7 @@
   line-height: 1.5;
   font-weight: 400;
   color: #0f172a;
-  background: #edf4ff;
+  background: #edf9f6;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -29,8 +29,9 @@ body {
   margin: 0;
   min-width: 320px;
   background:
-    radial-gradient(circle at top, rgba(96, 165, 250, 0.2), transparent 30%),
-    linear-gradient(180deg, #f8fbff 0%, #edf4ff 48%, #e2ecff 100%);
+    radial-gradient(circle at top, rgba(45, 212, 191, 0.18), transparent 32%),
+    radial-gradient(circle at bottom, rgba(125, 211, 252, 0.16), transparent 28%),
+    linear-gradient(180deg, #f7fffd 0%, #edf9f6 50%, #e6f7fb 100%);
 }
 
 button,

@@ -92,7 +92,7 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-blue-700 via-blue-700 to-indigo-800 px-4 text-white shadow-xl shadow-blue-900/15">
+      <section className="rounded-[28px] border border-white/20 bg-gradient-to-br from-teal-500 via-cyan-500 to-sky-500 px-4 text-white shadow-xl shadow-teal-900/10">
         <div className="flex h-12 items-center justify-between gap-3">
           <div>
             <button
@@ -128,7 +128,7 @@ export default function CalendarPage() {
         </div>
       </section>
 
-      <section className="-ml-14 w-[calc(100%+3.5rem)] rounded-[32px] border border-blue-100 bg-blue-50/70 p-3">
+      <section className="-ml-14 w-[calc(100%+3.5rem)] rounded-[32px] border border-teal-100 bg-white/75 p-3 shadow-sm shadow-teal-900/5">
         <CalendarGrid
           month={currentMonth}
           selectedDate={selectedDate}

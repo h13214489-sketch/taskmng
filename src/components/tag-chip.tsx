@@ -11,8 +11,8 @@ export function TagChip({ label, color, selected = false, onClick }: TagChipProp
   const className = cn(
     "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium transition",
     selected
-      ? "border-blue-700 bg-blue-700 text-white shadow-md shadow-blue-900/20"
-      : "border-blue-100 bg-white text-slate-700 hover:border-blue-200 hover:shadow-sm",
+      ? "border-teal-600 bg-teal-600 text-white shadow-md shadow-teal-900/15"
+      : "border-teal-100 bg-white text-slate-700 hover:border-teal-200 hover:shadow-sm",
   );
 
   if (!onClick) {
