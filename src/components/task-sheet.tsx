@@ -171,11 +171,13 @@ export function TaskSheet({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-slate-900/50 backdrop-blur-sm">
+    <div className={cn("fixed inset-0 z-50 flex bg-slate-900/50 backdrop-blur-sm", mode === "create" ? "items-stretch" : "items-end")}>
       <section
         className={cn(
-          "w-full overflow-y-auto bg-blue-50 px-5 pb-4 pt-4 shadow-2xl shadow-blue-900/20",
-          mode === "create" ? "h-screen rounded-none" : "max-h-[92vh] rounded-t-[32px]",
+          "w-full overflow-y-auto bg-blue-50 px-5 shadow-2xl shadow-blue-900/20",
+          mode === "create"
+            ? "h-[100dvh] rounded-none pt-[max(1.25rem,env(safe-area-inset-top))] pb-0"
+            : "max-h-[92vh] rounded-t-[32px] pb-4 pt-4",
         )}
       >
         {mode !== "create" ? <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" /> : null}
@@ -280,7 +282,7 @@ export function TaskSheet({
             </div>
           </div>
         ) : (
-          <form className="space-y-3" onSubmit={handleSubmit}>
+          <form className="flex min-h-full flex-col space-y-3" onSubmit={handleSubmit}>
             <label className="block space-y-1.5">
               <input
                 value={name}
@@ -411,7 +413,12 @@ export function TaskSheet({
               </button>
             ) : null}
 
-            <div className="sticky bottom-0 -mx-5 bg-blue-50/95 px-5 pb-2 pt-3 backdrop-blur">
+            <div
+              className={cn(
+                "sticky bottom-0 -mx-5 mt-auto bg-blue-50/95 px-5 backdrop-blur",
+                mode === "create" ? "pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3" : "pb-2 pt-3",
+              )}
+            >
               <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
