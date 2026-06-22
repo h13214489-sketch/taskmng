@@ -183,7 +183,7 @@ export function TaskSheet({
           mode === "create" ? "h-screen rounded-none" : "max-h-[92vh] rounded-t-[32px]",
         )}
       >
-        <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" />
+        {mode !== "create" ? <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" /> : null}
         {mode !== "create" ? (
           <div className="mb-3 flex items-center justify-between gap-4">
             {mode === "detail" ? <div /> : <h2 className="text-lg font-semibold text-slate-900">{title}</h2>}
