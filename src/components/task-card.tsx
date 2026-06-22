@@ -29,7 +29,7 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
         }
       }}
       className={cn(
-        "cursor-pointer rounded-[28px] border border-rose-100 bg-white p-4 shadow-sm shadow-rose-900/5",
+        "cursor-pointer rounded-[28px] border border-blue-100 bg-white p-4 shadow-sm shadow-blue-900/5",
         task.status === "pending" && "border-slate-200 bg-slate-100/90 shadow-slate-900/5",
         task.status === "complete" && "border-slate-200 bg-slate-50/80",
       )}
@@ -49,7 +49,7 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
           {taskTags.map((tag) => (
             <div
               key={tag.id}
-              className="inline-flex items-center gap-1 rounded-full border border-rose-100 bg-white px-2 py-1 text-[10px] font-medium text-slate-600"
+              className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-white px-2 py-1 text-[10px] font-medium text-slate-600"
             >
               <span className="h-2 w-2 rounded-full" style={{ backgroundColor: tag.color }} />
               <span className="truncate">{tag.name}</span>
@@ -66,7 +66,7 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
               event.stopPropagation();
               onSetTodo();
             }}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-rose-600 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-rose-700"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-700 px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-800"
           >
             <Clock3 className="h-4 w-4" />
             {t("todo")}
@@ -84,7 +84,7 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
               "inline-flex items-center justify-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-semibold transition",
               task.status === "pending"
                 ? "bg-slate-700 text-white hover:bg-slate-800"
-                : "bg-rose-600 text-white hover:bg-rose-700",
+                : "bg-blue-700 text-white hover:bg-blue-800",
             )}
           >
             <CheckCheck className="h-4 w-4" />
@@ -109,7 +109,7 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
                 event.stopPropagation();
                 onPending();
               }}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-rose-100 bg-rose-50 px-3 py-2.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-3 py-2.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
             >
               <Clock3 className="h-4 w-4" />
               {t("pending")}

@@ -356,7 +356,7 @@ export function ImageLightbox({ open, src, alt, onClose }: ImageLightboxProps) {
       {qrValue || qrError ? (
         <div className="fixed inset-x-0 bottom-0 z-20 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <div
-            className="mx-auto w-full max-w-[440px] rounded-[28px] border border-rose-100 bg-white/95 p-4 shadow-2xl shadow-slate-900/25 backdrop-blur"
+            className="mx-auto w-full max-w-[440px] rounded-[28px] border border-blue-100 bg-white/95 p-4 shadow-2xl shadow-slate-900/25 backdrop-blur"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-3">
@@ -370,7 +370,7 @@ export function ImageLightbox({ open, src, alt, onClose }: ImageLightboxProps) {
                   setQrValue(null);
                   setQrError(null);
                 }}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-slate-600 transition hover:bg-rose-100"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
                 aria-label={t("close")}
               >
                 <X className="h-5 w-5" />
@@ -382,14 +382,14 @@ export function ImageLightbox({ open, src, alt, onClose }: ImageLightboxProps) {
                 <button
                   type="button"
                   onClick={() => void copyQrValue()}
-                  className="rounded-2xl border border-rose-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-rose-50"
+                  className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-blue-50"
                 >
                   {t("copyLink")}
                 </button>
                 <button
                   type="button"
                   onClick={openQrLink}
-                  className="rounded-2xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700"
+                  className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition hover:bg-blue-800"
                 >
                   {t("openLink")}
                 </button>

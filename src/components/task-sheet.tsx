@@ -174,7 +174,7 @@ export function TaskSheet({
     <div className={cn("fixed inset-0 z-50 flex bg-slate-900/50 backdrop-blur-sm", mode === "create" ? "items-stretch" : "items-end")}>
       <section
         className={cn(
-          "w-full overflow-y-auto bg-rose-50 px-5 shadow-2xl shadow-rose-900/20",
+          "w-full overflow-y-auto bg-blue-50 px-5 shadow-2xl shadow-blue-900/20",
           mode === "create"
             ? "h-[100dvh] rounded-none pt-[max(2.25rem,env(safe-area-inset-top))] pb-0"
             : "max-h-[92vh] rounded-t-[32px] pb-4 pt-4",
@@ -198,7 +198,7 @@ export function TaskSheet({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-full border border-rose-100 bg-white p-2 text-slate-500 transition hover:border-rose-200"
+                className="rounded-full border border-blue-100 bg-white p-2 text-slate-500 transition hover:border-blue-200"
                 aria-label={t("close")}
               >
                 <X className="h-5 w-5" />
@@ -209,7 +209,7 @@ export function TaskSheet({
 
         {mode === "complete" && task ? (
           <div className="space-y-4">
-            <div className="rounded-[28px] border border-rose-100 bg-white p-4">
+            <div className="rounded-[28px] border border-blue-100 bg-white p-4">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-semibold text-slate-900">{task.name}</h3>
                 {task.isMustDo ? <span className="text-sm font-black text-rose-600">!</span> : null}
@@ -228,7 +228,7 @@ export function TaskSheet({
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("uploadRecord")}</span>
               <label
                 className={cn(
-                  "flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-rose-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-rose-300 hover:bg-rose-50",
+                  "flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50",
                   isProcessingImage && "cursor-not-allowed opacity-60",
                 )}
               >
@@ -260,7 +260,7 @@ export function TaskSheet({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-2xl border border-rose-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
+                className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
               >
                 {t("cancel")}
               </button>
@@ -275,7 +275,7 @@ export function TaskSheet({
                   }
                 }}
                 disabled={isProcessingImage}
-                className="rounded-2xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {t("complete")}
               </button>
@@ -287,7 +287,7 @@ export function TaskSheet({
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-3 text-base font-semibold text-slate-900 outline-none transition focus:border-rose-400"
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-base font-semibold text-slate-900 outline-none transition focus:border-blue-400"
                 placeholder={t("taskName")}
                 required
               />
@@ -298,7 +298,7 @@ export function TaskSheet({
               <textarea
                 value={detail}
                 onChange={(event) => setDetail(event.target.value)}
-                className="min-h-16 w-full rounded-2xl border border-rose-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-rose-400"
+                className="min-h-16 w-full rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-400"
                 placeholder={t("taskDetail")}
               />
             </label>
@@ -308,18 +308,18 @@ export function TaskSheet({
               <input
                 value={deadline}
                 onChange={(event) => setDeadline(event.target.value)}
-                className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-rose-400"
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-400"
                 placeholder="dd/mm/yyyy"
                 required
               />
             </label>
 
-            <label className="flex items-center justify-between rounded-2xl border border-rose-100 bg-white px-4 py-3">
+            <label className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3">
               <span className="text-sm font-medium text-slate-700">{t("routineTask")}</span>
               <input type="checkbox" checked={isRoutine} onChange={(event) => setIsRoutine(event.target.checked)} />
             </label>
 
-            <label className="flex items-center justify-between rounded-2xl border border-rose-100 bg-white px-4 py-3">
+            <label className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3">
               <span className="text-sm font-medium text-slate-700">{t("mustDo")}</span>
               <input type="checkbox" checked={isMustDo} onChange={(event) => setIsMustDo(event.target.checked)} />
             </label>
@@ -346,7 +346,7 @@ export function TaskSheet({
             <div className="space-y-1.5">
               <label
                 className={cn(
-                  "flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-rose-200 bg-white px-4 py-4 text-sm font-medium text-slate-600 transition hover:border-rose-300 hover:bg-rose-50",
+                  "flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-4 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50",
                   isProcessingImage && "cursor-not-allowed opacity-60",
                 )}
               >
@@ -407,7 +407,7 @@ export function TaskSheet({
               <button
                 type="button"
                 onClick={() => void onEndRoutine(task)}
-                className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-rose-50"
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-blue-50"
               >
                 {t("endRoutineTask")}
               </button>
@@ -415,7 +415,7 @@ export function TaskSheet({
 
             <div
               className={cn(
-                "sticky bottom-0 -mx-5 mt-auto bg-rose-50/95 px-5 backdrop-blur",
+                "sticky bottom-0 -mx-5 mt-auto bg-blue-50/95 px-5 backdrop-blur",
                 mode === "create" ? "pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3" : "pb-2 pt-3",
               )}
             >
@@ -423,14 +423,14 @@ export function TaskSheet({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-2xl border border-rose-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
+                  className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
                 >
                   {t("cancel")}
                 </button>
                 <button
                   type="submit"
                   disabled={isProcessingImage}
-                  className="rounded-2xl bg-rose-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   {t("saveTask")}
                 </button>

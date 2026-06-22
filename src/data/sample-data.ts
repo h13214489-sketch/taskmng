@@ -12,7 +12,7 @@ function buildDate(dayOffset: number) {
 export const defaultTags: Tag[] = [
   { id: "tag-credit", name: "Credit Card", color: "#ef4444", createdAt: Date.now() - 10000 },
   { id: "tag-home", name: "Home", color: "#22c55e", createdAt: Date.now() - 9000 },
-  { id: "tag-work", name: "Work", color: "#ec4899", createdAt: Date.now() - 8000 },
+  { id: "tag-work", name: "Work", color: "#3b82f6", createdAt: Date.now() - 8000 },
 ];
 
 export const defaultSeries: TaskSeries[] = [

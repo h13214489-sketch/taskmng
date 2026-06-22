@@ -92,7 +92,7 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-rose-600 via-pink-600 to-fuchsia-700 px-4 text-white shadow-xl shadow-rose-900/15">
+      <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-blue-700 via-blue-700 to-indigo-800 px-4 text-white shadow-xl shadow-blue-900/15">
         <div className="flex h-12 items-center justify-between gap-3">
           <div>
             <button
@@ -128,7 +128,7 @@ export default function CalendarPage() {
         </div>
       </section>
 
-      <section className="-ml-14 w-[calc(100%+3.5rem)] rounded-[32px] border border-rose-100 bg-rose-50/70 p-3">
+      <section className="-ml-14 w-[calc(100%+3.5rem)] rounded-[32px] border border-blue-100 bg-blue-50/70 p-3">
         <CalendarGrid
           month={currentMonth}
           selectedDate={selectedDate}
@@ -258,7 +258,7 @@ export default function CalendarPage() {
                       className={cn(
                         "h-12 rounded-2xl text-sm font-semibold transition",
                         year === pickerYear
-                          ? "bg-rose-600 text-white shadow-lg shadow-rose-900/15"
+                          ? "bg-blue-700 text-white shadow-lg shadow-blue-900/15"
                           : "bg-slate-100 text-slate-700 hover:bg-slate-200",
                       )}
                     >
@@ -277,7 +277,7 @@ export default function CalendarPage() {
                     className={cn(
                       "h-12 rounded-2xl text-sm font-semibold transition",
                       monthIndex === pickerMonth
-                        ? "bg-rose-600 text-white shadow-lg shadow-rose-900/15"
+                        ? "bg-blue-700 text-white shadow-lg shadow-blue-900/15"
                         : "bg-slate-100 text-slate-700 hover:bg-slate-200",
                     )}
                   >

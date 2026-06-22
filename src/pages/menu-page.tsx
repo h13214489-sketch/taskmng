@@ -84,7 +84,7 @@ export default function MenuPage() {
   return (
     <div className="space-y-2">
       <div className="flex h-12 items-center">
-        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[24px] border border-rose-100 bg-white px-3 py-2.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2 rounded-[24px] border border-blue-100 bg-white px-3 py-2.5">
           <Search className="h-4 w-4 shrink-0 text-slate-400" />
           <input
             value={query}
@@ -98,20 +98,20 @@ export default function MenuPage() {
       <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3 pt-0.5">
         <form
           onSubmit={(event) => void handleSubmit(event)}
-          className="space-y-3 rounded-[28px] border border-rose-100 bg-white p-3"
+          className="space-y-3 rounded-[28px] border border-blue-100 bg-white p-3"
         >
           <label className="block space-y-2">
             <input
               value={restaurantName}
               onChange={(event) => setRestaurantName(event.target.value)}
               placeholder={t("restaurantNamePlaceholder")}
-              className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-rose-400"
+              className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-400"
             />
           </label>
 
           <div className="space-y-1.5">
             <span className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">{t("qrCode")}</span>
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-rose-200 bg-rose-50/60 px-4 py-4 text-sm font-medium text-slate-700">
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-blue-50/60 px-4 py-4 text-sm font-medium text-slate-700">
               <Camera className="h-4 w-4" />
               <span>{isProcessingImage ? `${t("uploadQrCode")}...` : t("uploadQrCode")}</span>
               <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
@@ -132,7 +132,7 @@ export default function MenuPage() {
           <button
             type="submit"
             disabled={!restaurantName.trim() || !qrCodeImage || isProcessingImage}
-            className="w-full rounded-2xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+            className="w-full rounded-2xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
           >
             {t("saveMenu")}
           </button>
@@ -145,7 +145,7 @@ export default function MenuPage() {
         ) : (
           <section className="space-y-2.5">
             {filteredItems.map((item) => (
-              <article key={item.id} className="rounded-[28px] border border-slate-100 bg-white p-3 shadow-sm shadow-rose-900/5">
+              <article key={item.id} className="rounded-[28px] border border-slate-100 bg-white p-3 shadow-sm shadow-blue-900/5">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Store className="h-4 w-4 text-slate-400" />

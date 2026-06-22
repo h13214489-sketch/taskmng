@@ -29,7 +29,7 @@ function AppRoutes() {
 
   if (!isReady) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-rose-50 px-6 text-center">
+      <div className="flex min-h-screen items-center justify-center bg-[#f4efe8] px-6 text-center">
         <div className="rounded-[32px] bg-white px-6 py-8 shadow-lg shadow-slate-900/10">
           <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Task List Mobile</p>
           <h1 className="mt-2 text-lg font-semibold text-slate-900">Loading your tasks...</h1>
