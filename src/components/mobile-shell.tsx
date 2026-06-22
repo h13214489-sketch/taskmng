@@ -131,12 +131,12 @@ export function MobileShell() {
   const shouldShowFab = !["/checklist", "/menu", "/settings"].includes(location.pathname);
 
   return (
-    <div className="min-h-screen bg-[#edf4ff] text-slate-900">
+    <div className="min-h-screen bg-rose-50 text-slate-900">
       {menuExpanded ? <div className="fixed inset-0 z-40 bg-slate-900/20" onClick={requestCloseMenu} /> : null}
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-blue-100 bg-white px-4 py-5 transition-transform duration-200",
+          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-rose-100 bg-white px-4 py-5 transition-transform duration-200",
           menuExpanded ? "translate-x-0" : "-translate-x-full",
         )}
         aria-hidden={!menuExpanded}
@@ -158,7 +158,7 @@ export function MobileShell() {
                 }}
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold transition",
-                  active ? "bg-blue-700 text-white shadow-lg shadow-blue-900/15" : "text-slate-500 hover:bg-blue-50",
+                  active ? "bg-rose-600 text-white shadow-lg shadow-rose-900/15" : "text-slate-500 hover:bg-rose-50",
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
@@ -183,7 +183,7 @@ export function MobileShell() {
                 }}
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold transition",
-                  active ? "bg-blue-700 text-white shadow-lg shadow-blue-900/15" : "text-slate-500 hover:bg-blue-50",
+                  active ? "bg-rose-600 text-white shadow-lg shadow-rose-900/15" : "text-slate-500 hover:bg-rose-50",
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
@@ -200,7 +200,7 @@ export function MobileShell() {
             <button
               type="button"
               onClick={menuExpanded ? requestCloseMenu : toggleMenu}
-              className="z-30 mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-700 text-white shadow-lg shadow-blue-900/20"
+              className="z-30 mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-600 text-white shadow-lg shadow-rose-900/20"
               aria-label={menuExpanded ? t("close") : t("menu")}
             >
               {menuExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -216,7 +216,7 @@ export function MobileShell() {
         <button
           type="button"
           onClick={() => openCreateSheet(selectedDate)}
-          className="fixed bottom-6 right-4 z-30 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white shadow-2xl shadow-blue-500/30 transition hover:scale-[1.02]"
+          className="fixed bottom-6 right-4 z-30 inline-flex h-16 w-16 items-center justify-center rounded-full bg-rose-500 text-white shadow-2xl shadow-rose-500/30 transition hover:scale-[1.02]"
         >
           <Plus className="h-7 w-7" />
         </button>

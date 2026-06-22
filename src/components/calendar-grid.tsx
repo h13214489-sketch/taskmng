@@ -21,17 +21,17 @@ interface CalendarGridProps {
 
 const severityStyles: Record<CalendarSeverity, string> = {
   none: "bg-white text-slate-500",
-  low: "bg-sky-50 text-sky-700",
-  medium: "bg-blue-100 text-blue-700",
-  high: "bg-indigo-100 text-indigo-700",
-  overdue: "bg-rose-50 text-rose-700",
+  low: "bg-amber-50 text-amber-800",
+  medium: "bg-orange-100 text-orange-800",
+  high: "bg-pink-100 text-pink-800",
+  overdue: "bg-rose-100 text-rose-800",
 };
 
 const severityEdgeStyles: Record<CalendarSeverity, string> = {
   none: "border-transparent",
-  low: "border-sky-400/80",
-  medium: "border-blue-500/80",
-  high: "border-indigo-500/80",
+  low: "border-amber-400/80",
+  medium: "border-orange-500/80",
+  high: "border-pink-500/80",
   overdue: "border-rose-500/80",
 };
 
@@ -69,8 +69,8 @@ export function CalendarGrid({ month, selectedDate, severityByDate, onSelectDate
                 isSameMonth(day, monthDate)
                   ? cn(hasTasks && "border-2", severityEdgeStyles[severity])
                   : "border-slate-100 text-slate-300",
-                isSelected && "ring-2 ring-blue-700 ring-offset-2 ring-offset-blue-50",
-                !isSelected && isToday && "ring-2 ring-slate-900/40 ring-offset-2 ring-offset-blue-50",
+                isSelected && "ring-2 ring-rose-600 ring-offset-2 ring-offset-rose-50",
+                !isSelected && isToday && "ring-2 ring-slate-900/40 ring-offset-2 ring-offset-rose-50",
                 isToday && "shadow-sm shadow-slate-900/10",
               )}
             >

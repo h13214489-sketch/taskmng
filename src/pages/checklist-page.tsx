@@ -70,7 +70,7 @@ export default function ChecklistPage() {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[30px] border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-900/5">
+      <section className="rounded-[30px] border border-rose-100 bg-white/90 p-3 shadow-sm shadow-rose-900/5">
         <div className="flex items-center gap-2">
           <div className="grid min-w-0 flex-1 grid-cols-2 gap-2">
             <button
@@ -78,11 +78,11 @@ export default function ChecklistPage() {
               onClick={() => setFilter((current) => (current === "todo" ? "all" : "todo"))}
               aria-pressed={filter === "todo"}
               className={cn(
-                "rounded-[22px] bg-blue-50 px-3 py-2.5 text-left transition hover:bg-blue-100",
-                filter === "todo" && "ring-2 ring-blue-700/30",
+                "rounded-[22px] bg-orange-50 px-3 py-2.5 text-left transition hover:bg-orange-100",
+                filter === "todo" && "ring-2 ring-orange-500/30",
               )}
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-500">{t("todo")}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-orange-600">{t("todo")}</p>
               <p className="mt-0.5 text-lg font-semibold text-slate-900">{remainingCount}</p>
             </button>
             <button
@@ -90,11 +90,11 @@ export default function ChecklistPage() {
               onClick={() => setFilter((current) => (current === "complete" ? "all" : "complete"))}
               aria-pressed={filter === "complete"}
               className={cn(
-                "rounded-[22px] bg-emerald-50 px-3 py-2.5 text-left transition hover:bg-emerald-100",
-                filter === "complete" && "ring-2 ring-emerald-600/30",
+                "rounded-[22px] bg-pink-50 px-3 py-2.5 text-left transition hover:bg-pink-100",
+                filter === "complete" && "ring-2 ring-pink-500/30",
               )}
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-600">{t("complete")}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-pink-600">{t("complete")}</p>
               <p className="mt-0.5 text-lg font-semibold text-slate-900">{completedCount}</p>
             </button>
           </div>
@@ -107,7 +107,7 @@ export default function ChecklistPage() {
                   setSelectionMode(false);
                   setSelectedIds([]);
                 }}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-slate-600 transition hover:bg-rose-100"
                 aria-label={t("cancel")}
               >
                 <X className="h-5 w-5" />
@@ -133,7 +133,7 @@ export default function ChecklistPage() {
                 setSelectionMode(true);
                 setSelectedIds([]);
               }}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-rose-100 bg-rose-50 text-slate-600 transition hover:bg-rose-100"
               aria-label={t("manage")}
             >
               <MoreHorizontal className="h-5 w-5" />
@@ -145,7 +145,7 @@ export default function ChecklistPage() {
       <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3">
         <form
           onSubmit={(event) => void handleSubmit(event)}
-          className="flex items-center gap-3 rounded-[28px] border border-blue-100 bg-white px-4 py-3 shadow-sm shadow-blue-900/5"
+          className="flex items-center gap-3 rounded-[28px] border border-rose-100 bg-white px-4 py-3 shadow-sm shadow-rose-900/5"
         >
           <input
             value={title}
@@ -157,7 +157,7 @@ export default function ChecklistPage() {
             type="submit"
             disabled={!canSubmit}
             className={cn(
-              "inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-700 text-white transition hover:bg-blue-800",
+              "inline-flex h-10 w-10 items-center justify-center rounded-full bg-rose-600 text-white transition hover:bg-rose-700",
               !canSubmit && "cursor-not-allowed bg-slate-200 text-slate-500 hover:bg-slate-200",
             )}
           >
@@ -194,9 +194,9 @@ export default function ChecklistPage() {
                   void toggleChecklistItem(item.id);
                 }}
                 className={cn(
-                  "flex items-center justify-between gap-4 rounded-[28px] border border-slate-100 bg-white px-4 py-4 shadow-sm shadow-blue-900/5 transition",
+                  "flex items-center justify-between gap-4 rounded-[28px] border border-slate-100 bg-white px-4 py-4 shadow-sm shadow-rose-900/5 transition",
                   item.completed && "border-emerald-100 bg-emerald-50/50",
-                  !item.completed && "hover:border-blue-200 hover:bg-blue-50/40",
+                  !item.completed && "hover:border-rose-200 hover:bg-rose-50/40",
                   selectionMode && "cursor-pointer",
                 )}
               >

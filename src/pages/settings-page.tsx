@@ -51,7 +51,7 @@ export default function SettingsPage() {
         <h1 className="text-base font-semibold text-slate-900">{t("settings")}</h1>
       </div>
 
-      <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3 rounded-[32px] border border-blue-100 bg-blue-50/70 p-3">
+      <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3 rounded-[32px] border border-rose-100 bg-rose-50/70 p-3">
         <div className="space-y-1.5">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{t("language")}</p>
           <div className="grid grid-cols-2 gap-2">
@@ -65,8 +65,8 @@ export default function SettingsPage() {
                 onClick={() => void handleLanguageChange(option.value)}
                 className={`rounded-2xl px-4 py-2.5 text-sm font-semibold ${
                   settings.language === option.value
-                    ? "bg-blue-700 text-white"
-                    : "border border-blue-100 bg-white text-slate-700"
+                    ? "bg-rose-600 text-white"
+                    : "border border-rose-100 bg-white text-slate-700"
                 }`}
               >
                 {option.label}
@@ -75,9 +75,9 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3">
+        <div className="flex items-center justify-between rounded-2xl border border-rose-100 bg-white px-4 py-3">
           <div className="flex items-center gap-3">
-            <BellRing className="h-5 w-5 text-blue-500" />
+            <BellRing className="h-5 w-5 text-rose-500" />
             <div>
               <p className="text-sm font-semibold text-slate-900">{t("notifications")}</p>
               <p className="mt-1 text-xs text-slate-500">{t("notificationsDescription")}</p>
@@ -90,7 +90,7 @@ export default function SettingsPage() {
             aria-label={t("notifications")}
             onClick={() => void handleNotificationsChange(!settings.notificationsEnabled)}
             className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition ${
-              settings.notificationsEnabled ? "bg-blue-700" : "bg-slate-300"
+              settings.notificationsEnabled ? "bg-rose-600" : "bg-slate-300"
             }`}
           >
             <span
@@ -101,7 +101,7 @@ export default function SettingsPage() {
           </button>
         </div>
 
-        <p className="rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-xs text-slate-500">
+        <p className="rounded-2xl border border-rose-100 bg-white px-4 py-2.5 text-xs text-slate-500">
           {t("notificationFormat", { count: 3 })}
         </p>
 
@@ -117,7 +117,7 @@ export default function SettingsPage() {
             type="time"
             value={settings.dailyReminderTime}
             onChange={(event) => void updateSettings({ dailyReminderTime: event.target.value })}
-            className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-blue-400"
+            className="w-full rounded-2xl border border-rose-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-rose-400"
           />
         </label>
       </section>

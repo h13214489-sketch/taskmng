@@ -27,7 +27,7 @@ export default function CompletedPage() {
 
   return (
     <div className="space-y-3">
-      <section className="flex items-center gap-3 rounded-[28px] border border-blue-100 bg-white px-4 py-3">
+      <section className="flex items-center gap-3 rounded-[28px] border border-rose-100 bg-white px-4 py-3">
         <Search className="h-4 w-4 text-slate-400" />
         <input
           value={query}
