@@ -14,6 +14,7 @@ export default function CalendarPage() {
     series,
     occurrences,
     checklistItems,
+    menuItems,
     tags,
     settings,
     currentMonth,
@@ -26,8 +27,8 @@ export default function CalendarPage() {
   } = useAppStore();
 
   const snapshot = useMemo(
-    () => ({ series, occurrences, checklistItems, tags, settings }),
-    [series, occurrences, checklistItems, tags, settings],
+    () => ({ series, occurrences, checklistItems, menuItems, tags, settings }),
+    [series, occurrences, checklistItems, menuItems, tags, settings],
   );
   const monthTasks = useMemo(() => resolveTasksForMonth(snapshot, parseStorageDate(currentMonth)), [snapshot, currentMonth]);
   const selectedTasks = useMemo(() => resolveTasksForDate(snapshot, selectedDate), [snapshot, selectedDate]);

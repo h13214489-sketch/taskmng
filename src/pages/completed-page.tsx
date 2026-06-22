@@ -8,12 +8,12 @@ import { resolveCompletedTasks } from "@/utils/task-logic";
 
 export default function CompletedPage() {
   const { t } = useTranslation();
-  const { series, occurrences, checklistItems, tags, settings, setTaskStatus, openDetailSheet } = useAppStore();
+  const { series, occurrences, checklistItems, menuItems, tags, settings, setTaskStatus, openDetailSheet } = useAppStore();
   const [query, setQuery] = useState("");
 
   const snapshot = useMemo(
-    () => ({ series, occurrences, checklistItems, tags, settings }),
-    [series, occurrences, checklistItems, tags, settings],
+    () => ({ series, occurrences, checklistItems, menuItems, tags, settings }),
+    [series, occurrences, checklistItems, menuItems, tags, settings],
   );
   const tasks = useMemo(() => resolveCompletedTasks(snapshot), [snapshot]);
   const normalizedQuery = query.trim().toLowerCase();

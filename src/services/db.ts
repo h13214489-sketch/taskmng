@@ -6,12 +6,13 @@ import {
   defaultSettings,
   defaultTags,
 } from "@/data/sample-data";
-import type { ChecklistItem, Settings, Tag, TaskOccurrence, TaskSeries } from "@/types/models";
+import type { ChecklistItem, RestaurantMenuItem, Settings, Tag, TaskOccurrence, TaskSeries } from "@/types/models";
 
 class TaskListDatabase extends Dexie {
   taskSeries!: Table<TaskSeries, string>;
   taskOccurrences!: Table<TaskOccurrence, string>;
   checklistItems!: Table<ChecklistItem, string>;
+  menuItems!: Table<RestaurantMenuItem, string>;
   tags!: Table<Tag, string>;
   settings!: Table<Settings & { id: string }, string>;
 
@@ -29,6 +30,15 @@ class TaskListDatabase extends Dexie {
       taskSeries: "id, startDate, isRoutine, createdAt",
       taskOccurrences: "id, seriesId, date, status",
       checklistItems: "id, completed, createdAt",
+      tags: "id, name, createdAt",
+      settings: "id",
+    });
+
+    this.version(3).stores({
+      taskSeries: "id, startDate, isRoutine, createdAt",
+      taskOccurrences: "id, seriesId, date, status",
+      checklistItems: "id, completed, createdAt",
+      menuItems: "id, restaurantName, createdAt",
       tags: "id, name, createdAt",
       settings: "id",
     });
@@ -61,10 +71,11 @@ export async function ensureSeedData() {
 export async function loadSnapshot() {
   await ensureSeedData();
 
-  const [series, occurrences, checklistItems, tags, settings] = await Promise.all([
+  const [series, occurrences, checklistItems, menuItems, tags, settings] = await Promise.all([
     db.taskSeries.toArray(),
     db.taskOccurrences.toArray(),
     db.checklistItems.toArray(),
+    db.menuItems.toArray(),
     db.tags.toArray(),
     db.settings.get("app-settings"),
   ]);
@@ -73,6 +84,7 @@ export async function loadSnapshot() {
     series,
     occurrences,
     checklistItems,
+    menuItems,
     tags,
     settings: settings
       ? {

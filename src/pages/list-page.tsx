@@ -59,15 +59,15 @@ function Section({ tasks, visibleCount, onLoadMore }: SectionProps) {
 
 export default function ListPage() {
   const { t } = useTranslation();
-  const { series, occurrences, checklistItems, tags, settings } = useAppStore();
+  const { series, occurrences, checklistItems, menuItems, tags, settings } = useAppStore();
   const [outstandingCount, setOutstandingCount] = useState(PAGE_SIZE);
   const [todoCount, setTodoCount] = useState(PAGE_SIZE);
   const [activeTab, setActiveTab] = useState<"outstanding" | "todo">("outstanding");
   const [query, setQuery] = useState("");
 
   const snapshot = useMemo(
-    () => ({ series, occurrences, checklistItems, tags, settings }),
-    [series, occurrences, checklistItems, tags, settings],
+    () => ({ series, occurrences, checklistItems, menuItems, tags, settings }),
+    [series, occurrences, checklistItems, menuItems, tags, settings],
   );
   const rawSections = useMemo(() => splitTaskSections(resolveActiveTasks(snapshot)), [snapshot]);
   const normalizedQuery = query.trim().toLowerCase();

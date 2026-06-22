@@ -1,4 +1,4 @@
-import { CalendarDays, CheckCircle2, ListChecks, ListTodo, Menu, Plus, Settings2, Tags, X } from "lucide-react";
+import { CalendarDays, CheckCircle2, ListChecks, ListTodo, Menu, Plus, Settings2, Tags, UtensilsCrossed, X } from "lucide-react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
@@ -6,12 +6,16 @@ import { TaskSheet } from "@/components/task-sheet";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/use-app-store";
 
-const navItems = [
+const calendarNavItems = [
   { to: "/", key: "calendar", icon: CalendarDays },
   { to: "/list", key: "list", icon: ListTodo },
-  { to: "/checklist", key: "checkList", icon: ListChecks },
   { to: "/tags", key: "tags", icon: Tags },
   { to: "/completed", key: "completed", icon: CheckCircle2 },
+] as const;
+
+const otherNavItems = [
+  { to: "/checklist", key: "checkList", icon: ListChecks },
+  { to: "/menu", key: "restaurantMenu", icon: UtensilsCrossed },
   { to: "/settings", key: "settings", icon: Settings2 },
 ] as const;
 
@@ -50,7 +54,37 @@ export function MobileShell() {
         </button>
 
         <nav className="mt-8 flex flex-1 flex-col gap-3">
-          {navItems.map((item) => {
+          {menuExpanded ? (
+            <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">{t("calendarGroup")}</p>
+          ) : null}
+
+          {calendarNavItems.map((item) => {
+            const Icon = item.icon;
+            const active = location.pathname === item.to;
+
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={cn(
+                  "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold transition",
+                  active ? "bg-blue-700 text-white shadow-lg shadow-blue-900/15" : "text-slate-500 hover:bg-blue-50",
+                )}
+              >
+                <Icon className="h-5 w-5 shrink-0" />
+                {menuExpanded ? <span>{t(item.key)}</span> : null}
+              </NavLink>
+            );
+          })}
+
+          <div
+            className={cn(
+              "mx-3 my-2 border-t border-slate-200",
+              menuExpanded ? "opacity-100" : "mx-4",
+            )}
+          />
+
+          {otherNavItems.map((item) => {
             const Icon = item.icon;
             const active = location.pathname === item.to;
 

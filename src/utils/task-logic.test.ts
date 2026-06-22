@@ -33,6 +33,7 @@ function createSnapshot(occurrences: TaskOccurrence[]): AppSnapshot {
     series: baseSeries,
     occurrences,
     checklistItems: [],
+    menuItems: [],
     tags: [],
     settings: {
       language: "en",

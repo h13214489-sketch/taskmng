@@ -8,6 +8,7 @@ import CalendarPage from "@/pages/calendar-page";
 import ChecklistPage from "@/pages/checklist-page";
 import CompletedPage from "@/pages/completed-page";
 import ListPage from "@/pages/list-page";
+import MenuPage from "@/pages/menu-page";
 import SettingsPage from "@/pages/settings-page";
 import TagsPage from "@/pages/tags-page";
 import { useAppStore } from "@/store/use-app-store";
@@ -42,6 +43,7 @@ function AppRoutes() {
           <Route path="/list" element={<ListPage />} />
           <Route path="/checklist" element={<ChecklistPage />} />
           <Route path="/completed" element={<CompletedPage />} />
+          <Route path="/menu" element={<MenuPage />} />
           <Route path="/tags" element={<TagsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />

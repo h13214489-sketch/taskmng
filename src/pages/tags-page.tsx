@@ -15,6 +15,7 @@ export default function TagsPage() {
     series,
     occurrences,
     checklistItems,
+    menuItems,
     tags,
     settings,
     activeTagId,
@@ -31,13 +32,15 @@ export default function TagsPage() {
   const [query, setQuery] = useState("");
 
   const tasks = useMemo(() => {
-    const resolved = resolveActiveTasks({ series, occurrences, checklistItems, tags, settings }).filter((task) => task.status !== "complete");
+    const resolved = resolveActiveTasks({ series, occurrences, checklistItems, menuItems, tags, settings }).filter(
+      (task) => task.status !== "complete",
+    );
     if (!activeTagId) {
       return resolved;
     }
 
     return resolved.filter((task) => task.tagIds.includes(activeTagId));
-  }, [series, occurrences, checklistItems, tags, settings, activeTagId]);
+  }, [series, occurrences, checklistItems, menuItems, tags, settings, activeTagId]);
   const normalizedQuery = query.trim().toLowerCase();
   const visibleTasks = useMemo(() => {
     if (!normalizedQuery) {

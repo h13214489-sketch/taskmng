@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Camera, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
+import { ImageLightbox } from "@/components/image-lightbox";
 import { TagChip } from "@/components/tag-chip";
 import type { AddTaskInput, ResolvedTask, Tag } from "@/types/models";
 import { toDisplayDate } from "@/utils/date";
+import { ImageUploadError, type ImageUploadErrorCode, optimizeImageFile } from "@/utils/image";
 
 interface TaskSheetProps {
   open: boolean;
@@ -41,6 +43,9 @@ export function TaskSheet({
   const [isMustDo, setIsMustDo] = useState(false);
   const [tagIds, setTagIds] = useState<string[]>([]);
   const [photo, setPhoto] = useState<string | undefined>();
+  const [previewImage, setPreviewImage] = useState<{ src: string; alt: string } | null>(null);
+  const [imageError, setImageError] = useState<string | null>(null);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
 
   useEffect(() => {
     if (mode !== "create") {
@@ -54,6 +59,7 @@ export function TaskSheet({
     setIsMustDo(false);
     setTagIds([]);
     setPhoto(undefined);
+    setImageError(null);
   }, [mode, selectedDate]);
 
   useEffect(() => {
@@ -62,6 +68,7 @@ export function TaskSheet({
     }
 
     setPhoto(undefined);
+    setImageError(null);
   }, [mode, task?.seriesId, task?.date]);
 
   const title = useMemo(() => {
@@ -80,36 +87,63 @@ export function TaskSheet({
     return null;
   }
 
+  function resolveImageError(code: ImageUploadErrorCode) {
+    switch (code) {
+      case "invalid_type":
+        return t("imageInvalidType");
+      case "file_too_large":
+        return t("imageTooLarge");
+      case "load_failed":
+      case "process_failed":
+      default:
+        return t("imageProcessFailed");
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!name.trim() || !deadline.trim()) {
       return;
     }
 
-    await onSave({
-      name,
-      detail,
-      deadline,
-      isRoutine,
-      isMustDo,
-      tagIds,
-      photo,
-    });
+    try {
+      await onSave({
+        name,
+        detail,
+        deadline,
+        isRoutine,
+        isMustDo,
+        tagIds,
+        photo,
+      });
+      setImageError(null);
+    } catch {
+      setImageError(t("imageSaveFailed"));
+    }
   }
 
   async function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result === "string") {
-        setPhoto(reader.result);
+    setImageError(null);
+    setIsProcessingImage(true);
+
+    try {
+      const optimizedImage = await optimizeImageFile(file);
+      setPhoto(optimizedImage.dataUrl);
+    } catch (error) {
+      if (error instanceof ImageUploadError) {
+        setImageError(resolveImageError(error.code));
+      } else {
+        setImageError(t("imageProcessFailed"));
       }
-    };
-    reader.readAsDataURL(file);
+    } finally {
+      setIsProcessingImage(false);
+    }
   }
 
   return (
@@ -149,17 +183,25 @@ export function TaskSheet({
                   ))}
               </div>
               {task.photo ? (
-                <img src={task.photo} alt={task.name} className="mt-4 h-44 w-full rounded-2xl object-cover" />
+                <button type="button" className="mt-4 block w-full" onClick={() => setPreviewImage({ src: task.photo ?? "", alt: task.name })}>
+                  <img src={task.photo} alt={task.name} className="h-44 w-full rounded-2xl object-cover cursor-zoom-in" loading="lazy" />
+                </button>
               ) : null}
               {task.completionPhoto ? (
                 <div className="mt-4 space-y-2">
                   <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("uploadRecord")}</p>
-                  <img
-                    src={task.completionPhoto}
-                    alt={`${task.name} ${t("uploadRecord")}`}
-                    className="h-44 w-full rounded-2xl object-cover"
-                    loading="lazy"
-                  />
+                  <button
+                    type="button"
+                    className="block w-full"
+                    onClick={() => setPreviewImage({ src: task.completionPhoto ?? "", alt: `${task.name} ${t("uploadRecord")}` })}
+                  >
+                    <img
+                      src={task.completionPhoto}
+                      alt={`${task.name} ${t("uploadRecord")}`}
+                      className="h-44 w-full rounded-2xl object-cover cursor-zoom-in"
+                      loading="lazy"
+                    />
+                  </button>
                 </div>
               ) : null}
             </div>
@@ -192,16 +234,22 @@ export function TaskSheet({
               <p className="mt-3 text-xs text-slate-500">
                 {t("deadline")}: {toDisplayDate(task.date)}
               </p>
-              {photo ? <img src={photo} alt="Completion record" className="mt-4 h-44 w-full rounded-2xl object-cover" /> : null}
+              {photo ? (
+                <button type="button" className="mt-4 block w-full" onClick={() => setPreviewImage({ src: photo, alt: t("completionRecordPreview") })}>
+                  <img src={photo} alt={t("completionRecordPreview")} className="h-44 w-full rounded-2xl object-cover cursor-zoom-in" />
+                </button>
+              ) : null}
             </div>
 
             <div className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("uploadRecord")}</span>
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600">
                 <Camera className="h-4 w-4" />
-                <span>{t("uploadRecord")}</span>
-                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
+                <span>{isProcessingImage ? `${t("uploadRecord")}...` : t("uploadRecord")}</span>
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
               </label>
+              <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
+              {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
@@ -214,8 +262,16 @@ export function TaskSheet({
               </button>
               <button
                 type="button"
-                onClick={() => void onConfirmComplete(task, photo)}
-                className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white"
+                onClick={async () => {
+                  try {
+                    await onConfirmComplete(task, photo);
+                    setImageError(null);
+                  } catch {
+                    setImageError(t("imageSaveFailed"));
+                  }
+                }}
+                disabled={isProcessingImage}
+                className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {t("complete")}
               </button>
@@ -288,10 +344,16 @@ export function TaskSheet({
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("photoUpload")}</span>
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600">
                 <Camera className="h-4 w-4" />
-                <span>{t("photoUpload")}</span>
-                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} />
+                <span>{isProcessingImage ? `${t("photoUpload")}...` : t("photoUpload")}</span>
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
               </label>
-              {photo ? <img src={photo} alt="Task preview" className="h-40 w-full rounded-2xl object-cover" /> : null}
+              <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
+              {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
+              {photo ? (
+                <button type="button" className="block w-full" onClick={() => setPreviewImage({ src: photo, alt: t("taskPreview") })}>
+                  <img src={photo} alt={t("taskPreview")} className="h-40 w-full rounded-2xl object-cover cursor-zoom-in" />
+                </button>
+              ) : null}
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
@@ -302,7 +364,11 @@ export function TaskSheet({
               >
                 {t("cancel")}
               </button>
-              <button type="submit" className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white">
+              <button
+                type="submit"
+                disabled={isProcessingImage}
+                className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+              >
                 {t("saveTask")}
               </button>
             </div>
@@ -317,6 +383,7 @@ export function TaskSheet({
           </div>
         ) : null}
       </section>
+      {previewImage ? <ImageLightbox open={true} src={previewImage.src} alt={previewImage.alt} onClose={() => setPreviewImage(null)} /> : null}
     </div>
   );
 }

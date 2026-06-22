@@ -7,6 +7,7 @@ import type {
   AppSnapshot,
   ChecklistItem,
   Language,
+  RestaurantMenuItem,
   ResolvedTask,
   Settings,
   Tag,
@@ -42,6 +43,8 @@ interface AppStore extends AppSnapshot {
   addChecklistItem: (title: string) => Promise<void>;
   toggleChecklistItem: (itemId: string) => Promise<void>;
   deleteChecklistItems: (itemIds: string[]) => Promise<void>;
+  addMenuItem: (restaurantName: string, qrCodeImage: string) => Promise<void>;
+  deleteMenuItem: (itemId: string) => Promise<void>;
   addTag: (name: string, color: string) => Promise<void>;
   deleteTag: (tagId: string) => Promise<void>;
   updateSettings: (patch: Partial<Settings>) => Promise<void>;
@@ -54,6 +57,7 @@ const defaultState: AppSnapshot = {
   series: [],
   occurrences: [],
   checklistItems: [],
+  menuItems: [],
   tags: [],
   settings: {
     language: "en",
@@ -94,6 +98,17 @@ function createChecklistItem(title: string): ChecklistItem {
     id: crypto.randomUUID(),
     title: title.trim(),
     completed: false,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+}
+
+function createMenuItem(restaurantName: string, qrCodeImage: string): RestaurantMenuItem {
+  const timestamp = Date.now();
+  return {
+    id: crypto.randomUUID(),
+    restaurantName: restaurantName.trim(),
+    qrCodeImage,
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -311,6 +326,23 @@ export const useAppStore = create<AppStore>((set, get) => ({
     await db.checklistItems.bulkDelete(itemIds);
     set((state) => ({
       checklistItems: state.checklistItems.filter((item) => !itemIds.includes(item.id)),
+    }));
+  },
+
+  async addMenuItem(restaurantName, qrCodeImage) {
+    if (!restaurantName.trim() || !qrCodeImage) {
+      return;
+    }
+
+    const item = createMenuItem(restaurantName, qrCodeImage);
+    await db.menuItems.add(item);
+    set((state) => ({ menuItems: [...state.menuItems, item] }));
+  },
+
+  async deleteMenuItem(itemId) {
+    await db.menuItems.delete(itemId);
+    set((state) => ({
+      menuItems: state.menuItems.filter((item) => item.id !== itemId),
     }));
   },
 

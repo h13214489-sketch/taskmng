@@ -10,6 +10,14 @@ export interface ChecklistItem {
   updatedAt: number;
 }
 
+export interface RestaurantMenuItem {
+  id: string;
+  restaurantName: string;
+  qrCodeImage: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface Tag {
   id: string;
   name: string;
@@ -66,6 +74,7 @@ export interface AppSnapshot {
   series: TaskSeries[];
   occurrences: TaskOccurrence[];
   checklistItems: ChecklistItem[];
+  menuItems: RestaurantMenuItem[];
   tags: Tag[];
   settings: Settings;
 }
