@@ -36,6 +36,7 @@ export function MobileShell() {
     closeSheet,
     addTask,
     updateTask,
+    clearTaskCompletionPhoto,
     deleteTask,
     endRoutineTask,
   } = useAppStore();
@@ -230,6 +231,7 @@ export function MobileShell() {
         onClose={closeSheet}
         onSave={addTask}
         onUpdate={updateTask}
+        onDeleteCompletionPhoto={clearTaskCompletionPhoto}
         onConfirmComplete={async (task, completionPhoto) => {
           await useAppStore.getState().setTaskStatus(task, "complete", completionPhoto);
           closeSheet();

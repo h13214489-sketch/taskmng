@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Camera, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -19,6 +19,7 @@ interface TaskSheetProps {
   onSave: (input: AddTaskInput) => Promise<void>;
   onUpdate: (task: ResolvedTask, input: AddTaskInput) => Promise<void>;
   onConfirmComplete: (task: ResolvedTask, completionPhoto?: string) => Promise<void>;
+  onDeleteCompletionPhoto: (task: ResolvedTask) => Promise<void>;
   onDelete: (task: ResolvedTask) => Promise<void>;
   onEndRoutine: (task: ResolvedTask) => Promise<void>;
 }
@@ -33,6 +34,7 @@ export function TaskSheet({
   onSave,
   onUpdate,
   onConfirmComplete,
+  onDeleteCompletionPhoto,
   onDelete,
   onEndRoutine,
 }: TaskSheetProps) {
@@ -47,7 +49,8 @@ export function TaskSheet({
   const [previewImage, setPreviewImage] = useState<{ src: string; alt: string } | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const photoInputId = useMemo(() => "task-sheet-photo-input", []);
+  const completionInputId = useMemo(() => "task-sheet-completion-input", []);
 
   useEffect(() => {
     if (mode !== "create") {
@@ -167,14 +170,6 @@ export function TaskSheet({
     }
   }
 
-  function openFilePicker() {
-    if (isProcessingImage) {
-      return;
-    }
-
-    fileInputRef.current?.click();
-  }
-
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-slate-900/50 backdrop-blur-sm">
       <section
@@ -229,26 +224,28 @@ export function TaskSheet({
 
             <div className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("uploadRecord")}</span>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                onChange={handleFileChange}
-                disabled={isProcessingImage}
-                tabIndex={-1}
-              />
-              <button
-                type="button"
-                onClick={openFilePicker}
-                disabled={isProcessingImage}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+              <input id={completionInputId} type="file" accept="image/*" className="sr-only" onChange={handleFileChange} disabled={isProcessingImage} />
+              <label
+                htmlFor={completionInputId}
+                className={cn(
+                  "flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50",
+                  isProcessingImage && "cursor-not-allowed opacity-60",
+                )}
               >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("uploadRecord")}...` : t("uploadRecord")}</span>
-              </button>
+              </label>
               <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
               {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
+              {photo ? (
+                <button
+                  type="button"
+                  onClick={() => setPhoto(undefined)}
+                  className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600"
+                >
+                  {t("removePhoto")}
+                </button>
+              ) : null}
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
@@ -339,24 +336,17 @@ export function TaskSheet({
             </div>
 
             <div className="space-y-1.5">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="sr-only"
-                onChange={handleFileChange}
-                disabled={isProcessingImage}
-                tabIndex={-1}
-              />
-              <button
-                type="button"
-                onClick={openFilePicker}
-                disabled={isProcessingImage}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-4 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+              <input id={photoInputId} type="file" accept="image/*" className="sr-only" onChange={handleFileChange} disabled={isProcessingImage} />
+              <label
+                htmlFor={photoInputId}
+                className={cn(
+                  "flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-4 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50",
+                  isProcessingImage && "cursor-not-allowed opacity-60",
+                )}
               >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("photoUpload")}...` : t("photoUpload")}</span>
-              </button>
+              </label>
               <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
               {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
               {photo ? (
@@ -364,21 +354,39 @@ export function TaskSheet({
                   <img src={photo} alt={t("taskPreview")} className="h-40 w-full rounded-2xl object-cover cursor-zoom-in" />
                 </button>
               ) : null}
+              {photo ? (
+                <button
+                  type="button"
+                  onClick={() => setPhoto(undefined)}
+                  className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600"
+                >
+                  {t("removePhoto")}
+                </button>
+              ) : null}
             </div>
 
             {mode === "detail" && task?.completionPhoto ? (
-              <button
-                type="button"
-                className="block w-full"
-                onClick={() => setPreviewImage({ src: task.completionPhoto ?? "", alt: `${task.name} ${t("uploadRecord")}` })}
-              >
-                <img
-                  src={task.completionPhoto}
-                  alt={`${task.name} ${t("uploadRecord")}`}
-                  className="h-28 w-full rounded-2xl object-cover cursor-zoom-in"
-                  loading="lazy"
-                />
-              </button>
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  className="block w-full"
+                  onClick={() => setPreviewImage({ src: task.completionPhoto ?? "", alt: `${task.name} ${t("uploadRecord")}` })}
+                >
+                  <img
+                    src={task.completionPhoto}
+                    alt={`${task.name} ${t("uploadRecord")}`}
+                    className="h-28 w-full rounded-2xl object-cover cursor-zoom-in"
+                    loading="lazy"
+                  />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void onDeleteCompletionPhoto(task)}
+                  className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600"
+                >
+                  {t("removeRecord")}
+                </button>
+              </div>
             ) : null}
 
             {mode === "detail" && task?.isRoutine ? (

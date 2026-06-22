@@ -174,24 +174,25 @@ export default function ChecklistPage() {
             {filteredItems.map((item) => (
               <div
                 key={item.id}
-                role={selectionMode ? "button" : undefined}
-                tabIndex={selectionMode ? 0 : undefined}
-                onClick={
-                  selectionMode
-                    ? () => {
-                        toggleSelected(item.id);
-                      }
-                    : undefined
-                }
-                onKeyDown={
-                  selectionMode
-                    ? (event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          toggleSelected(item.id);
-                        }
-                      }
-                    : undefined
-                }
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  if (selectionMode) {
+                    toggleSelected(item.id);
+                    return;
+                  }
+                  void toggleChecklistItem(item.id);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key !== "Enter" && event.key !== " ") {
+                    return;
+                  }
+                  if (selectionMode) {
+                    toggleSelected(item.id);
+                    return;
+                  }
+                  void toggleChecklistItem(item.id);
+                }}
                 className={cn(
                   "flex items-center justify-between gap-4 rounded-[28px] border border-slate-100 bg-white px-4 py-4 shadow-sm shadow-blue-900/5 transition",
                   item.completed && "border-emerald-100 bg-emerald-50/50",
@@ -202,14 +203,11 @@ export default function ChecklistPage() {
                 <div className="min-w-0 flex-1">
                   <p
                     className={cn(
-                      "text-sm font-medium text-slate-900",
+                      "text-base font-semibold text-slate-900",
                       item.completed && "text-slate-400 line-through",
                     )}
                   >
                     {item.title}
-                  </p>
-                  <p className={cn("mt-1 text-xs font-medium", item.completed ? "text-emerald-600" : "text-slate-400")}>
-                    {item.completed ? t("complete") : t("todo")}
                   </p>
                 </div>
                 {selectionMode ? (
@@ -223,19 +221,7 @@ export default function ChecklistPage() {
                   >
                     {selectedIds.includes(item.id) ? <Check className="h-6 w-6" /> : null}
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => void toggleChecklistItem(item.id)}
-                    className={cn(
-                      "inline-flex h-11 w-11 items-center justify-center rounded-2xl border transition",
-                      item.completed ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-500",
-                    )}
-                    aria-label={item.completed ? t("complete") : t("todo")}
-                  >
-                    {item.completed ? <Check className="h-6 w-6" /> : null}
-                  </button>
-                )}
+                ) : null}
               </div>
             ))}
           </section>

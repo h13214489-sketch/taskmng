@@ -39,6 +39,7 @@ interface AppStore extends AppSnapshot {
   addTask: (input: AddTaskInput) => Promise<void>;
   updateTask: (task: ResolvedTask, input: AddTaskInput) => Promise<void>;
   setTaskStatus: (task: ResolvedTask, status: TaskOccurrence["status"], completionPhoto?: string) => Promise<void>;
+  clearTaskCompletionPhoto: (task: ResolvedTask) => Promise<void>;
   deleteTask: (task: ResolvedTask) => Promise<void>;
   endRoutineTask: (task: ResolvedTask) => Promise<void>;
   addChecklistItem: (title: string) => Promise<void>;
@@ -273,6 +274,23 @@ export const useAppStore = create<AppStore>((set, get) => ({
         : [...state.occurrences, nextOccurrence],
       editorTask: state.editorTask?.occurrenceId === task.occurrenceId
         ? { ...state.editorTask, status: nextOccurrence.status, completionPhoto: nextOccurrence.completionPhoto }
+        : state.editorTask,
+    }));
+  },
+
+  async clearTaskCompletionPhoto(task) {
+    const existing = get().occurrences.find((item) => item.seriesId === task.seriesId && item.date === task.date);
+    if (!existing || !existing.completionPhoto) {
+      return;
+    }
+
+    const nextOccurrence: TaskOccurrence = { ...existing, completionPhoto: undefined };
+    await db.taskOccurrences.put(nextOccurrence);
+
+    set((state) => ({
+      occurrences: state.occurrences.map((item) => (item.id === nextOccurrence.id ? nextOccurrence : item)),
+      editorTask: state.editorTask?.occurrenceId === task.occurrenceId
+        ? { ...state.editorTask, completionPhoto: undefined }
         : state.editorTask,
     }));
   },

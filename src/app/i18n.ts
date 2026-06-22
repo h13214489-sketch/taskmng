@@ -82,6 +82,8 @@ const resources = {
       openLink: "Open Link",
       copyLink: "Copy Link",
       copied: "Copied",
+      removePhoto: "Remove Photo",
+      removeRecord: "Remove Record",
     },
   },
   zh: {
@@ -163,6 +165,8 @@ const resources = {
       openLink: "開啟連結",
       copyLink: "複製連結",
       copied: "已複製",
+      removePhoto: "刪除照片",
+      removeRecord: "刪除記錄",
     },
   },
 };
