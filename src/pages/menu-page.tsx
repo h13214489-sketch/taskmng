@@ -73,85 +73,87 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-slate-900">{t("restaurantMenu")}</h1>
+    <div className="space-y-3">
+      <h1 className="text-base font-semibold text-slate-900">{t("restaurantMenu")}</h1>
 
-      <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4 rounded-[28px] border border-blue-100 bg-white p-4">
-        <label className="block space-y-2">
-          <input
-            value={restaurantName}
-            onChange={(event) => setRestaurantName(event.target.value)}
-            placeholder={t("restaurantNamePlaceholder")}
-            className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
-          />
-        </label>
-
-        <div className="space-y-2">
-          <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("qrCode")}</span>
-          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-blue-50/60 px-4 py-5 text-sm font-medium text-slate-700">
-            <Camera className="h-4 w-4" />
-            <span>{isProcessingImage ? `${t("uploadQrCode")}...` : t("uploadQrCode")}</span>
-            <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
+      <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3">
+        <form onSubmit={(event) => void handleSubmit(event)} className="space-y-4 rounded-[28px] border border-blue-100 bg-white p-4">
+          <label className="block space-y-2">
+            <input
+              value={restaurantName}
+              onChange={(event) => setRestaurantName(event.target.value)}
+              placeholder={t("restaurantNamePlaceholder")}
+              className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
+            />
           </label>
-          <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
-          {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
-          {qrCodeImage ? (
-            <button
-              type="button"
-              onClick={() => setPreviewImage({ src: qrCodeImage, alt: t("qrCode") })}
-              className="block w-full"
-            >
-              <img src={qrCodeImage} alt={t("qrCode")} className="h-28 w-full rounded-2xl bg-slate-50 p-3 object-contain cursor-zoom-in" />
-            </button>
-          ) : null}
-        </div>
 
-        <button
-          type="submit"
-          disabled={!restaurantName.trim() || !qrCodeImage || isProcessingImage}
-          className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
-        >
-          {t("saveMenu")}
-        </button>
-      </form>
+          <div className="space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("qrCode")}</span>
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-blue-50/60 px-4 py-5 text-sm font-medium text-slate-700">
+              <Camera className="h-4 w-4" />
+              <span>{isProcessingImage ? `${t("uploadQrCode")}...` : t("uploadQrCode")}</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
+            </label>
+            <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
+            {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
+            {qrCodeImage ? (
+              <button
+                type="button"
+                onClick={() => setPreviewImage({ src: qrCodeImage, alt: t("qrCode") })}
+                className="block w-full"
+              >
+                <img src={qrCodeImage} alt={t("qrCode")} className="h-28 w-full rounded-2xl bg-slate-50 p-3 object-contain cursor-zoom-in" />
+              </button>
+            ) : null}
+          </div>
 
-      {sortedItems.length === 0 ? (
-        <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
-          {t("noMenuItems")}
-        </div>
-      ) : (
-        <section className="space-y-3">
-          {sortedItems.map((item) => (
-            <article key={item.id} className="rounded-[28px] border border-slate-100 bg-white p-4 shadow-sm shadow-blue-900/5">
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <Store className="h-4 w-4 text-slate-400" />
-                  <h2 className="text-sm font-semibold text-slate-900">{item.restaurantName}</h2>
+          <button
+            type="submit"
+            disabled={!restaurantName.trim() || !qrCodeImage || isProcessingImage}
+            className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+          >
+            {t("saveMenu")}
+          </button>
+        </form>
+
+        {sortedItems.length === 0 ? (
+          <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
+            {t("noMenuItems")}
+          </div>
+        ) : (
+          <section className="space-y-3">
+            {sortedItems.map((item) => (
+              <article key={item.id} className="rounded-[28px] border border-slate-100 bg-white p-4 shadow-sm shadow-blue-900/5">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <Store className="h-4 w-4 text-slate-400" />
+                    <h2 className="text-sm font-semibold text-slate-900">{item.restaurantName}</h2>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void deleteMenuItem(item.id)}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-rose-100 bg-rose-50 text-rose-600 transition hover:bg-rose-100"
+                    aria-label={t("delete")}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
                 </div>
                 <button
                   type="button"
-                  onClick={() => void deleteMenuItem(item.id)}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-rose-100 bg-rose-50 text-rose-600 transition hover:bg-rose-100"
-                  aria-label={t("delete")}
+                  onClick={() => setPreviewImage({ src: item.qrCodeImage, alt: `${item.restaurantName} QR Code` })}
+                  className="mt-4 block w-full"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <img
+                    src={item.qrCodeImage}
+                    alt={`${item.restaurantName} QR Code`}
+                    className="h-44 w-full rounded-2xl bg-slate-50 p-3 object-contain cursor-zoom-in"
+                  />
                 </button>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPreviewImage({ src: item.qrCodeImage, alt: `${item.restaurantName} QR Code` })}
-                className="mt-4 block w-full"
-              >
-                <img
-                  src={item.qrCodeImage}
-                  alt={`${item.restaurantName} QR Code`}
-                  className="h-44 w-full rounded-2xl bg-slate-50 p-3 object-contain cursor-zoom-in"
-                />
-              </button>
-            </article>
-          ))}
-        </section>
-      )}
+              </article>
+            ))}
+          </section>
+        )}
+      </section>
 
       {previewImage ? <ImageLightbox open={true} src={previewImage.src} alt={previewImage.alt} onClose={() => setPreviewImage(null)} /> : null}
     </div>

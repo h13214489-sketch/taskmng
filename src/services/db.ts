@@ -91,7 +91,7 @@ export async function loadSnapshot() {
           language: settings.language,
           notificationsEnabled: settings.notificationsEnabled,
           dailyReminderTime: settings.dailyReminderTime,
-          reminderSupportAcknowledged: settings.reminderSupportAcknowledged,
+          lastReminderProcessedOn: settings.lastReminderProcessedOn,
         }
       : defaultSettings,
   };

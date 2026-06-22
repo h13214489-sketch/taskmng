@@ -246,7 +246,7 @@ export function TaskSheet({
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600">
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("uploadRecord")}...` : t("uploadRecord")}</span>
-                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
+                <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
               </label>
               <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
               {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
@@ -345,7 +345,7 @@ export function TaskSheet({
               <label className="flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600">
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("photoUpload")}...` : t("photoUpload")}</span>
-                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
+                <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isProcessingImage} />
               </label>
               <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
               {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}

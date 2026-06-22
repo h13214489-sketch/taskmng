@@ -144,6 +144,13 @@ export function splitTaskSections(tasks: ResolvedTask[], compareDate = todayStor
   };
 }
 
+export function resolveReminderTasks(snapshot: AppSnapshot, compareDate = todayStorageDate()) {
+  return resolveActiveTasks(snapshot)
+    .filter((task) => task.status === "todo" || task.status === "pending")
+    .filter((task) => task.date === compareDate || isPastDate(task.date, compareDate))
+    .sort((left, right) => left.date.localeCompare(right.date) || left.name.localeCompare(right.name));
+}
+
 export function buildCalendarSeverity(tasks: ResolvedTask[], compareDate = todayStorageDate()): CalendarSeverity {
   const activeTasks = tasks.filter((task) => task.status !== "complete");
   const mustDoCount = activeTasks.filter((task) => task.isMustDo).length;

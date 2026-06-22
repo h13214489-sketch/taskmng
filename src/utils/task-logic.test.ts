@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { AppSnapshot, TaskOccurrence, TaskSeries } from "@/types/models";
-import { buildCalendarSeverity, resolveTasksForDate, splitTaskSections } from "@/utils/task-logic";
+import { buildCalendarSeverity, resolveReminderTasks, resolveTasksForDate, splitTaskSections } from "@/utils/task-logic";
 
 const baseSeries: TaskSeries[] = [
   {
@@ -39,7 +39,6 @@ function createSnapshot(occurrences: TaskOccurrence[]): AppSnapshot {
       language: "en",
       notificationsEnabled: false,
       dailyReminderTime: "09:00",
-      reminderSupportAcknowledged: false,
     },
   };
 }
@@ -102,6 +101,28 @@ describe("task logic", () => {
 
     expect(sections.outstanding).toHaveLength(1);
     expect(sections.todo).toHaveLength(1);
+  });
+
+  it("collects overdue and today's todo or pending tasks for reminders", () => {
+    const snapshot = createSnapshot([
+      {
+        id: "occ-routine",
+        seriesId: "routine-1",
+        date: "2026-06-05",
+        status: "pending",
+      },
+      {
+        id: "occ-oneoff",
+        seriesId: "oneoff-1",
+        date: "2026-06-10",
+        status: "todo",
+      },
+    ]);
+
+    const tasks = resolveReminderTasks(snapshot, "2026-06-10");
+
+    expect(tasks.map((task) => task.name)).toEqual(["Pay rent", "Submit report"]);
+    expect(tasks.map((task) => task.status)).toEqual(["pending", "todo"]);
   });
 
   it("marks days with must-do tasks as high severity", () => {

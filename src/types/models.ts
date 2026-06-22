@@ -53,7 +53,7 @@ export interface Settings {
   language: Language;
   notificationsEnabled: boolean;
   dailyReminderTime: string;
-  reminderSupportAcknowledged: boolean;
+  lastReminderProcessedOn?: string;
 }
 
 export interface ResolvedTask {

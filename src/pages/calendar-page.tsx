@@ -42,11 +42,11 @@ export default function CalendarPage() {
   }, [monthTasks]);
 
   return (
-    <div className="space-y-5">
-      <section className="rounded-[32px] bg-blue-700 px-5 py-5 text-white shadow-xl shadow-blue-900/15">
-        <div className="flex items-center justify-between gap-3">
+    <div className="space-y-4">
+      <section className="rounded-[28px] bg-blue-700 px-4 text-white shadow-xl shadow-blue-900/15">
+        <div className="flex h-12 items-center justify-between gap-3">
           <div>
-            <h1 className="mt-1 text-lg font-semibold">
+            <h1 className="text-sm font-semibold">
               {parseStorageDate(currentMonth).toLocaleDateString(settings.language === "zh" ? "zh-HK" : "en-GB", {
                 month: "long",
                 year: "numeric",
@@ -57,14 +57,14 @@ export default function CalendarPage() {
             <button
               type="button"
               onClick={() => shiftCurrentMonth(-1)}
-              className="rounded-full border border-blue-500 p-2 text-blue-50"
+              className="rounded-full border border-blue-500 p-1.5 text-blue-50"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
             <button
               type="button"
               onClick={() => shiftCurrentMonth(1)}
-              className="rounded-full border border-blue-500 p-2 text-blue-50"
+              className="rounded-full border border-blue-500 p-1.5 text-blue-50"
             >
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -72,7 +72,7 @@ export default function CalendarPage() {
         </div>
       </section>
 
-      <section className="rounded-[32px] border border-blue-100 bg-blue-50/70 p-4">
+      <section className="-ml-14 w-[calc(100%+3.5rem)] rounded-[32px] border border-blue-100 bg-blue-50/70 p-3">
         <CalendarGrid
           month={currentMonth}
           selectedDate={selectedDate}
@@ -81,7 +81,7 @@ export default function CalendarPage() {
         />
       </section>
 
-      <section className="space-y-3">
+      <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.16em] text-slate-400">{t("selectedDate")}</p>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { BellRing } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
@@ -6,19 +7,51 @@ import { useAppStore } from "@/store/use-app-store";
 export default function SettingsPage() {
   const { t, i18n } = useTranslation();
   const { settings, updateSettings, setLanguage } = useAppStore();
+  const [notificationError, setNotificationError] = useState<string | null>(null);
 
   async function handleLanguageChange(language: "en" | "zh") {
     await setLanguage(language);
     await i18n.changeLanguage(language);
   }
 
-  return (
-    <div className="space-y-5">
-      <section className="rounded-[32px] bg-blue-700 px-5 py-5 text-white shadow-xl shadow-blue-900/15">
-        <h1 className="mt-1 text-lg font-semibold">{t("settings")}</h1>
-      </section>
+  async function handleNotificationsChange(enabled: boolean) {
+    if (!enabled) {
+      setNotificationError(null);
+      await updateSettings({ notificationsEnabled: false });
+      return;
+    }
 
-      <section className="space-y-4 rounded-[32px] border border-blue-100 bg-blue-50/70 p-5">
+    if (typeof Notification === "undefined" || !("serviceWorker" in navigator)) {
+      setNotificationError(t("notificationUnsupported"));
+      await updateSettings({ notificationsEnabled: false });
+      return;
+    }
+
+    const permission = Notification.permission === "granted"
+      ? "granted"
+      : await Notification.requestPermission();
+
+    if (permission !== "granted") {
+      setNotificationError(
+        permission === "denied"
+          ? t("notificationPermissionDenied")
+          : t("notificationPermissionRequired"),
+      );
+      await updateSettings({ notificationsEnabled: false });
+      return;
+    }
+
+    setNotificationError(null);
+    await updateSettings({ notificationsEnabled: true });
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <h1 className="text-base font-semibold text-slate-900">{t("settings")}</h1>
+      </div>
+
+      <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-4 rounded-[32px] border border-blue-100 bg-blue-50/70 p-4">
         <div className="space-y-2">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{t("language")}</p>
           <div className="grid grid-cols-2 gap-3">
@@ -42,19 +75,41 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <label className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-4">
+        <div className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-4">
           <div className="flex items-center gap-3">
             <BellRing className="h-5 w-5 text-blue-500" />
             <div>
               <p className="text-sm font-semibold text-slate-900">{t("notifications")}</p>
+              <p className="mt-1 text-xs text-slate-500">{t("notificationsDescription")}</p>
             </div>
           </div>
-          <input
-            type="checkbox"
-            checked={settings.notificationsEnabled}
-            onChange={(event) => void updateSettings({ notificationsEnabled: event.target.checked })}
-          />
-        </label>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={settings.notificationsEnabled}
+            aria-label={t("notifications")}
+            onClick={() => void handleNotificationsChange(!settings.notificationsEnabled)}
+            className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full transition ${
+              settings.notificationsEnabled ? "bg-blue-700" : "bg-slate-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition ${
+                settings.notificationsEnabled ? "translate-x-6" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        <p className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-xs text-slate-500">
+          {t("notificationFormat", { count: 3 })}
+        </p>
+
+        {notificationError ? (
+          <p className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-xs text-rose-600">
+            {notificationError}
+          </p>
+        ) : null}
 
         <label className="block space-y-2">
           <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">{t("reminderTime")}</span>
@@ -65,7 +120,6 @@ export default function SettingsPage() {
             className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none focus:border-blue-400"
           />
         </label>
-
       </section>
     </div>
   );

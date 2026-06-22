@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import i18n from "@/app/i18n";
 import { MobileShell } from "@/components/mobile-shell";
+import { useReminderNotifications } from "@/hooks/use-reminder-notifications";
 import CalendarPage from "@/pages/calendar-page";
 import ChecklistPage from "@/pages/checklist-page";
 import CompletedPage from "@/pages/completed-page";
@@ -15,6 +16,8 @@ import { useAppStore } from "@/store/use-app-store";
 
 function AppRoutes() {
   const { isReady, settings, loadApp } = useAppStore();
+
+  useReminderNotifications();
 
   useEffect(() => {
     void loadApp();

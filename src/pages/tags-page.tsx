@@ -71,19 +71,17 @@ export default function TagsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h2 className="text-base font-semibold text-slate-900">{t("activeTag")}</h2>
-            <button
-              type="button"
-              onClick={() => setIsCreateOpen((value) => !value)}
-              className="rounded-2xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/15"
-            >
-              {isCreateOpen ? t("close") : t("addTag")}
-            </button>
-          </div>
+          <h2 className="text-base font-semibold text-slate-900">{t("activeTag")}</h2>
+          <button
+            type="button"
+            onClick={() => setIsCreateOpen((value) => !value)}
+            className="rounded-2xl bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-900/15"
+          >
+            {isCreateOpen ? t("close") : t("addTag")}
+          </button>
           {activeTagId ? (
             <button type="button" onClick={() => setActiveTagId(null)} className="text-xs font-semibold text-blue-700">
               {t("viewAll")}
@@ -91,53 +89,55 @@ export default function TagsPage() {
           ) : null}
         </div>
 
-        {isCreateOpen ? (
-          <form className="rounded-[32px] border border-blue-100 bg-blue-50/70 p-5 space-y-3" onSubmit={handleCreateTag}>
-            <input
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              placeholder={t("tagName")}
-              className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm outline-none focus:border-blue-400"
-            />
-            <div className="flex flex-wrap gap-2">
-              {colorChoices.map((choice) => (
-                <button
-                  key={choice}
-                  type="button"
-                  onClick={() => setColor(choice)}
-                  className="h-9 w-9 rounded-full border-2"
-                  style={{ backgroundColor: choice, borderColor: color === choice ? "#1d4ed8" : "#ffffff" }}
-                />
-              ))}
-            </div>
-            <button type="submit" className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white">
-              {t("createTag")}
-            </button>
-          </form>
-        ) : null}
-
-        <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
-            <div key={tag.id} className="inline-flex items-center gap-2 rounded-full bg-white pr-2 shadow-sm">
-              <TagChip
-                label={tag.name}
-                color={tag.color}
-                selected={activeTagId === tag.id}
-                onClick={() => setActiveTagId(activeTagId === tag.id ? null : tag.id)}
+        <div className="-ml-14 w-[calc(100%+3.5rem)] space-y-3">
+          {isCreateOpen ? (
+            <form className="rounded-[32px] border border-blue-100 bg-blue-50/70 p-5 space-y-3" onSubmit={handleCreateTag}>
+              <input
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder={t("tagName")}
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm outline-none focus:border-blue-400"
               />
-              <button
-                type="button"
-                onClick={() => void handleDeleteTag(tag.id)}
-                className="text-slate-400 transition hover:text-rose-500"
-              >
-                <Trash2 className="h-4 w-4" />
+              <div className="flex flex-wrap gap-2">
+                {colorChoices.map((choice) => (
+                  <button
+                    key={choice}
+                    type="button"
+                    onClick={() => setColor(choice)}
+                    className="h-9 w-9 rounded-full border-2"
+                    style={{ backgroundColor: choice, borderColor: color === choice ? "#1d4ed8" : "#ffffff" }}
+                  />
+                ))}
+              </div>
+              <button type="submit" className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white">
+                {t("createTag")}
               </button>
-            </div>
-          ))}
+            </form>
+          ) : null}
+
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+              <div key={tag.id} className="inline-flex items-center gap-2 rounded-full bg-white pr-2 shadow-sm">
+                <TagChip
+                  label={tag.name}
+                  color={tag.color}
+                  selected={activeTagId === tag.id}
+                  onClick={() => setActiveTagId(activeTagId === tag.id ? null : tag.id)}
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleDeleteTag(tag.id)}
+                  className="text-slate-400 transition hover:text-rose-500"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <section className="space-y-3">
+      <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3">
         <div className="flex items-center gap-3 rounded-[28px] border border-blue-100 bg-white px-4 py-3">
           <Search className="h-4 w-4 text-slate-400" />
           <input

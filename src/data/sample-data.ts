@@ -76,5 +76,4 @@ export const defaultSettings: Settings = {
   language: "en",
   notificationsEnabled: false,
   dailyReminderTime: "09:00",
-  reminderSupportAcknowledged: false,
 };

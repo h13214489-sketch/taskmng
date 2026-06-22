@@ -1,6 +1,5 @@
-export const MAX_IMAGE_UPLOAD_SIZE_BYTES = 10 * 1024 * 1024;
+export const MAX_IMAGE_UPLOAD_SIZE_BYTES = 20 * 1024 * 1024;
 export const MAX_IMAGE_DIMENSION = 1600;
-const OUTPUT_IMAGE_TYPE = "image/webp";
 const OUTPUT_IMAGE_QUALITY = 0.86;
 
 export type ImageUploadErrorCode = "invalid_type" | "file_too_large" | "load_failed" | "process_failed";
@@ -40,20 +39,9 @@ function readBlobAsDataUrl(blob: Blob) {
   });
 }
 
-function canvasToBlob(canvas: HTMLCanvasElement) {
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => {
-        if (blob) {
-          resolve(blob);
-          return;
-        }
-
-        reject(new ImageUploadError("process_failed"));
-      },
-      OUTPUT_IMAGE_TYPE,
-      OUTPUT_IMAGE_QUALITY,
-    );
+function canvasToBlob(canvas: HTMLCanvasElement, type: string) {
+  return new Promise<Blob | null>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), type, OUTPUT_IMAGE_QUALITY);
   });
 }
 
@@ -84,7 +72,12 @@ export async function optimizeImageFile(file: File) {
 
     context.drawImage(image, 0, 0, targetWidth, targetHeight);
 
-    const blob = await canvasToBlob(canvas);
+    const webpBlob = await canvasToBlob(canvas, "image/webp");
+    const jpegBlob = webpBlob ? null : await canvasToBlob(canvas, "image/jpeg");
+    const blob = webpBlob ?? jpegBlob;
+    if (!blob) {
+      throw new ImageUploadError("process_failed");
+    }
     const dataUrl = await readBlobAsDataUrl(blob);
 
     return {
@@ -96,4 +89,3 @@ export async function optimizeImageFile(file: File) {
     URL.revokeObjectURL(objectUrl);
   }
 }
-

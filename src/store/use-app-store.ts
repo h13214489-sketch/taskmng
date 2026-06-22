@@ -63,7 +63,6 @@ const defaultState: AppSnapshot = {
     language: "en",
     notificationsEnabled: false,
     dailyReminderTime: "09:00",
-    reminderSupportAcknowledged: false,
   },
 };
 
