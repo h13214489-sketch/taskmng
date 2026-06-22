@@ -46,6 +46,7 @@ function Section({ tasks, visibleCount, onLoadMore }: SectionProps) {
           key={`${task.seriesId}-${task.date}`}
           task={task}
           tags={tags}
+          tagsBelowActions={true}
           onComplete={() => openCompleteSheet(task)}
           onPending={() => void setTaskStatus(task, "pending")}
           onSetTodo={() => void setTaskStatus(task, "todo")}

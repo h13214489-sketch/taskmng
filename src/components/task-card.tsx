@@ -13,9 +13,10 @@ interface TaskCardProps {
   onPending: () => void;
   onSetTodo: () => void;
   onOpenDetail: () => void;
+  tagsBelowActions?: boolean;
 }
 
-export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenDetail }: TaskCardProps) {
+export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenDetail, tagsBelowActions = false }: TaskCardProps) {
   const { t } = useTranslation();
   const taskTags = tags.filter((tag) => task.tagIds.includes(tag.id));
 
@@ -71,11 +72,13 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
         </div>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {taskTags.map((tag) => (
-          <TagChip key={tag.id} label={tag.name} color={tag.color} />
-        ))}
-      </div>
+      {!tagsBelowActions ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {taskTags.map((tag) => (
+            <TagChip key={tag.id} label={tag.name} color={tag.color} />
+          ))}
+        </div>
+      ) : null}
 
       {task.status === "complete" ? (
         <div className="mt-4">
@@ -131,6 +134,14 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
           )}
         </div>
       )}
+
+      {tagsBelowActions ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {taskTags.map((tag) => (
+            <TagChip key={tag.id} label={tag.name} color={tag.color} />
+          ))}
+        </div>
+      ) : null}
     </article>
   );
 }
