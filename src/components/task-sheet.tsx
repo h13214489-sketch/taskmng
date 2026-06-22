@@ -176,7 +176,7 @@ export function TaskSheet({
         className={cn(
           "w-full overflow-y-auto bg-blue-50 px-5 shadow-2xl shadow-blue-900/20",
           mode === "create"
-            ? "h-[100dvh] rounded-none pt-[max(1.25rem,env(safe-area-inset-top))] pb-0"
+            ? "h-[100dvh] rounded-none pt-[max(2.25rem,env(safe-area-inset-top))] pb-0"
             : "max-h-[92vh] rounded-t-[32px] pb-4 pt-4",
         )}
       >
