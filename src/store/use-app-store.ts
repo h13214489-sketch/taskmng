@@ -5,6 +5,7 @@ import { db, loadSnapshot } from "@/services/db";
 import type {
   AddTaskInput,
   AppSnapshot,
+  ChecklistGroup,
   ChecklistItem,
   Language,
   RestaurantMenuItem,
@@ -37,12 +38,11 @@ interface AppStore extends AppSnapshot {
   openCompleteSheet: (task: ResolvedTask) => void;
   closeSheet: () => void;
   addTask: (input: AddTaskInput) => Promise<void>;
-  updateTask: (task: ResolvedTask, input: AddTaskInput) => Promise<void>;
   setTaskStatus: (task: ResolvedTask, status: TaskOccurrence["status"], completionPhoto?: string) => Promise<void>;
-  clearTaskCompletionPhoto: (task: ResolvedTask) => Promise<void>;
   deleteTask: (task: ResolvedTask) => Promise<void>;
   endRoutineTask: (task: ResolvedTask) => Promise<void>;
-  addChecklistItem: (title: string) => Promise<void>;
+  addChecklistGroup: (name: string) => Promise<void>;
+  addChecklistItem: (title: string, groupId?: string) => Promise<void>;
   toggleChecklistItem: (itemId: string) => Promise<void>;
   deleteChecklistItems: (itemIds: string[]) => Promise<void>;
   addMenuItem: (restaurantName: string, qrCodeImage: string) => Promise<void>;
@@ -58,6 +58,7 @@ const initialDate = todayStorageDate();
 const defaultState: AppSnapshot = {
   series: [],
   occurrences: [],
+  checklistGroups: [],
   checklistItems: [],
   menuItems: [],
   tags: [],
@@ -84,21 +85,6 @@ function createSeriesFromInput(input: AddTaskInput): TaskSeries {
   };
 }
 
-function updateSeriesFromInput(series: TaskSeries, input: AddTaskInput): TaskSeries {
-  const parsedDate = parseDisplayDate(input.deadline);
-  return {
-    ...series,
-    name: input.name.trim(),
-    detail: input.detail.trim(),
-    photo: input.photo,
-    startDate: toStorageDate(parsedDate),
-    deadlineDay: parsedDate.getDate(),
-    isRoutine: input.isRoutine,
-    isMustDo: input.isMustDo,
-    tagIds: input.tagIds,
-  };
-}
-
 function createOccurrenceForSeries(series: TaskSeries): TaskOccurrence {
   return {
     id: crypto.randomUUID(),
@@ -112,8 +98,19 @@ function createChecklistItem(title: string): ChecklistItem {
   const timestamp = Date.now();
   return {
     id: crypto.randomUUID(),
+    groupId: "unknown",
     title: title.trim(),
     completed: false,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+}
+
+function createChecklistGroup(name: string): ChecklistGroup {
+  const timestamp = Date.now();
+  return {
+    id: crypto.randomUUID(),
+    name: name.trim(),
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -214,40 +211,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
     }));
   },
 
-  async updateTask(task, input) {
-    const series = get().series.find((item) => item.id === task.seriesId);
-    if (!series) {
-      return;
-    }
-
-    const updatedSeries = updateSeriesFromInput(series, input);
-    const nextSelectedDate = updatedSeries.isRoutine ? get().selectedDate : updatedSeries.startDate;
-
-    const shouldMoveOccurrence = !series.isRoutine && !updatedSeries.isRoutine && series.startDate !== updatedSeries.startDate;
-    const existingOccurrenceToMove = shouldMoveOccurrence
-      ? get().occurrences.find((item) => item.seriesId === series.id && item.date === series.startDate)
-      : undefined;
-    const movedOccurrence = existingOccurrenceToMove ? { ...existingOccurrenceToMove, date: updatedSeries.startDate } : undefined;
-
-    await db.transaction("rw", db.taskSeries, db.taskOccurrences, async () => {
-      await db.taskSeries.put(updatedSeries);
-      if (movedOccurrence) {
-        await db.taskOccurrences.put(movedOccurrence);
-      }
-    });
-
-    set((state) => ({
-      series: state.series.map((item) => (item.id === updatedSeries.id ? updatedSeries : item)),
-      occurrences: movedOccurrence
-        ? state.occurrences.map((item) => (item.id === movedOccurrence.id ? movedOccurrence : item))
-        : state.occurrences,
-      selectedDate: nextSelectedDate,
-      currentMonth: nextSelectedDate,
-      editorMode: null,
-      editorTask: null,
-    }));
-  },
-
   async setTaskStatus(task, status, completionPhoto) {
     const existing = get().occurrences.find((item) => item.seriesId === task.seriesId && item.date === task.date);
     const nextOccurrence: TaskOccurrence = existing
@@ -274,23 +237,6 @@ export const useAppStore = create<AppStore>((set, get) => ({
         : [...state.occurrences, nextOccurrence],
       editorTask: state.editorTask?.occurrenceId === task.occurrenceId
         ? { ...state.editorTask, status: nextOccurrence.status, completionPhoto: nextOccurrence.completionPhoto }
-        : state.editorTask,
-    }));
-  },
-
-  async clearTaskCompletionPhoto(task) {
-    const existing = get().occurrences.find((item) => item.seriesId === task.seriesId && item.date === task.date);
-    if (!existing || !existing.completionPhoto) {
-      return;
-    }
-
-    const nextOccurrence: TaskOccurrence = { ...existing, completionPhoto: undefined };
-    await db.taskOccurrences.put(nextOccurrence);
-
-    set((state) => ({
-      occurrences: state.occurrences.map((item) => (item.id === nextOccurrence.id ? nextOccurrence : item)),
-      editorTask: state.editorTask?.occurrenceId === task.occurrenceId
-        ? { ...state.editorTask, completionPhoto: undefined }
         : state.editorTask,
     }));
   },
@@ -358,12 +304,27 @@ export const useAppStore = create<AppStore>((set, get) => ({
     }));
   },
 
-  async addChecklistItem(title) {
+  async addChecklistGroup(name) {
+    if (!name.trim()) {
+      return;
+    }
+
+    const group = createChecklistGroup(name);
+    await db.checklistGroups.add(group);
+    set((state) => ({ checklistGroups: [...state.checklistGroups, group] }));
+  },
+
+  async addChecklistItem(title, groupId) {
     if (!title.trim()) {
       return;
     }
 
-    const item = createChecklistItem(title);
+    const resolvedGroupId = groupId ?? get().checklistGroups[0]?.id;
+    if (!resolvedGroupId) {
+      return;
+    }
+
+    const item = { ...createChecklistItem(title), groupId: resolvedGroupId };
     await db.checklistItems.add(item);
     set((state) => ({ checklistItems: [...state.checklistItems, item] }));
   },

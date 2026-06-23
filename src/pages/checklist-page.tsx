@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Check, MoreHorizontal, Plus, X } from "lucide-react";
+import { Check, ChevronDown, MoreHorizontal, Plus, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -9,13 +9,19 @@ type ChecklistFilter = "all" | "todo" | "complete";
 
 export default function ChecklistPage() {
   const { t } = useTranslation();
-  const { checklistItems, addChecklistItem, toggleChecklistItem, deleteChecklistItems } = useAppStore();
-  const [title, setTitle] = useState("");
+  const { checklistGroups, checklistItems, addChecklistGroup, addChecklistItem, toggleChecklistItem, deleteChecklistItems } = useAppStore();
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<ChecklistFilter>("all");
-  const canSubmit = Boolean(title.trim());
+  const [actionsOpen, setActionsOpen] = useState(false);
+  const [createGroupOpen, setCreateGroupOpen] = useState(false);
+  const [groupName, setGroupName] = useState("");
+  const [draftByGroup, setDraftByGroup] = useState<Record<string, string>>({});
+  const [collapsedByGroup, setCollapsedByGroup] = useState<Record<string, boolean>>({});
 
+  const sortedGroups = useMemo(() => {
+    return [...checklistGroups].sort((left, right) => left.createdAt - right.createdAt);
+  }, [checklistGroups]);
   const sortedItems = useMemo(() => {
     return [...checklistItems].sort((left, right) => {
       if (left.completed !== right.completed) {
@@ -43,8 +49,51 @@ export default function ChecklistPage() {
     setSelectedIds([]);
   }, [filter]);
 
+  useEffect(() => {
+    setCollapsedByGroup((current) => {
+      if (sortedGroups.length === 0) {
+        return {};
+      }
+
+      if (Object.keys(current).length > 0) {
+        const next: Record<string, boolean> = { ...current };
+        sortedGroups.forEach((group) => {
+          if (typeof next[group.id] !== "boolean") {
+            next[group.id] = true;
+          }
+        });
+        return next;
+      }
+
+      return sortedGroups.reduce<Record<string, boolean>>((result, group, index) => {
+        result[group.id] = index !== 0;
+        return result;
+      }, {});
+    });
+  }, [sortedGroups]);
+
   function toggleSelected(itemId: string) {
     setSelectedIds((current) => (current.includes(itemId) ? current.filter((id) => id !== itemId) : [...current, itemId]));
+  }
+
+  function openActions() {
+    if (selectionMode) {
+      return;
+    }
+    setActionsOpen(true);
+  }
+
+  function closeActions() {
+    setActionsOpen(false);
+  }
+
+  function openCreateGroup() {
+    setGroupName("");
+    setCreateGroupOpen(true);
+  }
+
+  function closeCreateGroup() {
+    setCreateGroupOpen(false);
   }
 
   async function handleDeleteSelected() {
@@ -57,20 +106,20 @@ export default function ChecklistPage() {
     setSelectionMode(false);
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleCreateGroup(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const nextTitle = title.trim();
-    if (!nextTitle) {
+    const nextName = groupName.trim();
+    if (!nextName) {
       return;
     }
 
-    await addChecklistItem(nextTitle);
-    setTitle("");
+    await addChecklistGroup(nextName);
+    closeCreateGroup();
   }
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[30px] border border-teal-100 bg-white/90 p-3 shadow-sm shadow-teal-900/5">
+      <section className="rounded-[30px] border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-900/5">
         <div className="flex items-center gap-2">
           <div className="grid min-w-0 flex-1 grid-cols-2 gap-2">
             <button
@@ -78,11 +127,11 @@ export default function ChecklistPage() {
               onClick={() => setFilter((current) => (current === "todo" ? "all" : "todo"))}
               aria-pressed={filter === "todo"}
               className={cn(
-                "rounded-[22px] bg-teal-50 px-3 py-2.5 text-left transition hover:bg-teal-100",
-                filter === "todo" && "ring-2 ring-teal-600/30",
+                "rounded-[22px] bg-blue-50 px-3 py-2.5 text-left transition hover:bg-blue-100",
+                filter === "todo" && "ring-2 ring-blue-700/30",
               )}
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-500">{t("todo")}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-500">{t("todo")}</p>
               <p className="mt-0.5 text-lg font-semibold text-slate-900">{remainingCount}</p>
             </button>
             <button
@@ -107,7 +156,7 @@ export default function ChecklistPage() {
                   setSelectionMode(false);
                   setSelectedIds([]);
                 }}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-teal-100 bg-teal-50 text-slate-600 transition hover:bg-teal-100"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
                 aria-label={t("cancel")}
               >
                 <X className="h-5 w-5" />
@@ -129,10 +178,7 @@ export default function ChecklistPage() {
           ) : (
             <button
               type="button"
-              onClick={() => {
-                setSelectionMode(true);
-                setSelectedIds([]);
-              }}
+              onClick={openActions}
               className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
               aria-label={t("manage")}
             >
@@ -143,90 +189,233 @@ export default function ChecklistPage() {
       </section>
 
       <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-3">
-        <form
-          onSubmit={(event) => void handleSubmit(event)}
-          className="flex items-center gap-3 rounded-[28px] border border-teal-100 bg-white px-4 py-3 shadow-sm shadow-teal-900/5"
-        >
-          <input
-            value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder={t("checkListPlaceholder")}
-            className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
-          />
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className={cn(
-              "inline-flex h-10 w-10 items-center justify-center rounded-full bg-teal-600 text-white transition hover:bg-teal-700",
-              !canSubmit && "cursor-not-allowed bg-slate-200 text-slate-500 hover:bg-slate-200",
-            )}
-          >
-            <Plus className="h-5 w-5" />
-          </button>
-        </form>
-
-        {filteredItems.length === 0 ? (
+        {sortedGroups.length === 0 ? (
           <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
             {t("noCheckListItems")}
           </div>
         ) : (
-          <section className="space-y-3">
-            {filteredItems.map((item) => (
-              <div
-                key={item.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => {
-                  if (selectionMode) {
-                    toggleSelected(item.id);
-                    return;
-                  }
-                  void toggleChecklistItem(item.id);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter" && event.key !== " ") {
-                    return;
-                  }
-                  if (selectionMode) {
-                    toggleSelected(item.id);
-                    return;
-                  }
-                  void toggleChecklistItem(item.id);
-                }}
-                className={cn(
-                  "flex items-center justify-between gap-4 rounded-[28px] border border-slate-100 bg-white px-4 py-4 shadow-sm shadow-teal-900/5 transition",
-                  item.completed && "border-emerald-100 bg-emerald-50/50",
-                  !item.completed && "hover:border-teal-200 hover:bg-teal-50/40",
-                  selectionMode && "cursor-pointer",
-                )}
-              >
-                <div className="min-w-0 flex-1">
-                  <p
-                    className={cn(
-                      "text-base font-semibold text-slate-900",
-                      item.completed && "text-slate-400 line-through",
-                    )}
+          <section className="space-y-2.5">
+            {sortedGroups.map((group) => {
+              const items = sortedItems.filter((item) => item.groupId === group.id);
+              const groupCompletedCount = items.filter((item) => item.completed).length;
+              const visibleItems = filteredItems.filter((item) => item.groupId === group.id);
+              const collapsed = collapsedByGroup[group.id] ?? true;
+              const draft = draftByGroup[group.id] ?? "";
+              const canSubmit = Boolean(draft.trim());
+
+              return (
+                <section key={group.id} className="rounded-[28px] border border-slate-100 bg-white p-3 shadow-sm shadow-blue-900/5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setCollapsedByGroup((current) => ({
+                        ...current,
+                        [group.id]: !(current[group.id] ?? true),
+                      }))
+                    }
+                    className="flex w-full items-center justify-between gap-3"
                   >
-                    {item.title}
-                  </p>
-                </div>
-                {selectionMode ? (
-                  <div
-                    className={cn(
-                      "inline-flex h-11 w-11 items-center justify-center rounded-2xl border transition",
-                      selectedIds.includes(item.id)
-                        ? "border-slate-900 bg-slate-900 text-white"
-                        : "border-slate-300 bg-white text-slate-500",
-                    )}
-                  >
-                    {selectedIds.includes(item.id) ? <Check className="h-6 w-6" /> : null}
-                  </div>
-                ) : null}
-              </div>
-            ))}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-900">{group.name}</p>
+                    </div>
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <span className="text-xs font-semibold">
+                        {groupCompletedCount}/{items.length}
+                      </span>
+                      <ChevronDown className={cn("h-5 w-5 transition", !collapsed && "rotate-180")} />
+                    </div>
+                  </button>
+
+                  {!collapsed ? (
+                    <div className="mt-3 space-y-2">
+                      {visibleItems.length === 0 ? (
+                        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-center text-sm text-slate-500">
+                          {t("noCheckListItems")}
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {visibleItems.map((item) => (
+                            <div
+                              key={item.id}
+                              role={selectionMode ? "button" : undefined}
+                              tabIndex={selectionMode ? 0 : undefined}
+                              onClick={
+                                selectionMode
+                                  ? () => {
+                                      toggleSelected(item.id);
+                                    }
+                                  : undefined
+                              }
+                              onKeyDown={
+                                selectionMode
+                                  ? (event) => {
+                                      if (event.key === "Enter" || event.key === " ") {
+                                        toggleSelected(item.id);
+                                      }
+                                    }
+                                  : undefined
+                              }
+                              className={cn(
+                                "flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-3 transition",
+                                item.completed && "border-emerald-100 bg-emerald-50/40",
+                                selectionMode && "cursor-pointer",
+                                selectionMode && selectedIds.includes(item.id) && "border-slate-900 bg-slate-900/5",
+                              )}
+                            >
+                              <div className="min-w-0 flex-1">
+                                <p className={cn("truncate text-sm font-medium text-slate-900", item.completed && "text-slate-400 line-through")}>
+                                  {item.title}
+                                </p>
+                              </div>
+                              {selectionMode ? (
+                                <div
+                                  className={cn(
+                                    "inline-flex h-9 w-9 items-center justify-center rounded-2xl border transition",
+                                    selectedIds.includes(item.id)
+                                      ? "border-slate-900 bg-slate-900 text-white"
+                                      : "border-slate-300 bg-white text-slate-500",
+                                  )}
+                                >
+                                  {selectedIds.includes(item.id) ? <Check className="h-5 w-5" /> : null}
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => void toggleChecklistItem(item.id)}
+                                  className={cn(
+                                    "inline-flex h-9 w-9 items-center justify-center rounded-2xl border transition",
+                                    item.completed
+                                      ? "border-slate-900 bg-slate-900 text-white"
+                                      : "border-slate-300 bg-white text-slate-500",
+                                  )}
+                                  aria-label={item.completed ? t("complete") : t("todo")}
+                                >
+                                  {item.completed ? <Check className="h-5 w-5" /> : null}
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {!selectionMode ? (
+                        <form
+                          onSubmit={(event) => {
+                            event.preventDefault();
+                            const nextTitle = draft.trim();
+                            if (!nextTitle) {
+                              return;
+                            }
+
+                            void addChecklistItem(nextTitle, group.id);
+                            setDraftByGroup((current) => ({ ...current, [group.id]: "" }));
+                          }}
+                          className="flex items-center gap-2 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-3 py-3"
+                        >
+                          <Plus className="h-4 w-4 text-slate-400" />
+                          <input
+                            value={draft}
+                            onChange={(event) => setDraftByGroup((current) => ({ ...current, [group.id]: event.target.value }))}
+                            placeholder={t("checkListPlaceholder")}
+                            className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+                          />
+                          <button
+                            type="submit"
+                            disabled={!canSubmit}
+                            className={cn(
+                              "inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-700 text-white transition",
+                              !canSubmit && "cursor-not-allowed bg-slate-200 text-slate-500",
+                            )}
+                            aria-label={t("saveTask")}
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </form>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </section>
+              );
+            })}
           </section>
         )}
       </section>
+
+      {actionsOpen ? (
+        <div className="fixed inset-0 z-[60] flex items-end bg-slate-900/35 backdrop-blur-sm" onClick={closeActions}>
+          <section className="w-full rounded-t-[28px] bg-white p-4" onClick={(event) => event.stopPropagation()}>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  closeActions();
+                  openCreateGroup();
+                }}
+                className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white"
+              >
+                {t("addGroup")}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  closeActions();
+                  setSelectionMode(true);
+                  setSelectedIds([]);
+                }}
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
+              >
+                {t("manage")}
+              </button>
+              <button
+                type="button"
+                onClick={closeActions}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700"
+              >
+                {t("cancel")}
+              </button>
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {createGroupOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/35 px-4 backdrop-blur-sm"
+          onClick={closeCreateGroup}
+        >
+          <section className="w-full max-w-[22rem] rounded-[28px] bg-white p-4 shadow-2xl shadow-slate-900/15" onClick={(event) => event.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold text-slate-900">{t("addGroup")}</p>
+              <button
+                type="button"
+                onClick={closeCreateGroup}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700"
+                aria-label={t("close")}
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={(event) => void handleCreateGroup(event)} className="mt-4 space-y-3">
+              <input
+                value={groupName}
+                onChange={(event) => setGroupName(event.target.value)}
+                placeholder={t("groupName")}
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
+                autoFocus
+              />
+              <button
+                type="submit"
+                disabled={!groupName.trim()}
+                className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+              >
+                {t("createGroup")}
+              </button>
+            </form>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }

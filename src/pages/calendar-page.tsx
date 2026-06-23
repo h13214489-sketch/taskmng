@@ -15,6 +15,7 @@ export default function CalendarPage() {
   const {
     series,
     occurrences,
+    checklistGroups,
     checklistItems,
     menuItems,
     tags,
@@ -34,8 +35,8 @@ export default function CalendarPage() {
   const [pickerDecadeStart, setPickerDecadeStart] = useState<number>(() => Math.floor(pickerYear / 10) * 10);
 
   const snapshot = useMemo(
-    () => ({ series, occurrences, checklistItems, menuItems, tags, settings }),
-    [series, occurrences, checklistItems, menuItems, tags, settings],
+    () => ({ series, occurrences, checklistGroups, checklistItems, menuItems, tags, settings }),
+    [series, occurrences, checklistGroups, checklistItems, menuItems, tags, settings],
   );
   const monthTasks = useMemo(() => resolveTasksForMonth(snapshot, parseStorageDate(currentMonth)), [snapshot, currentMonth]);
   const selectedTasks = useMemo(() => resolveTasksForDate(snapshot, selectedDate), [snapshot, selectedDate]);
@@ -92,7 +93,7 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[28px] border border-white/20 bg-gradient-to-br from-teal-500 via-cyan-500 to-sky-500 px-4 text-white shadow-xl shadow-teal-900/10">
+      <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-blue-700 via-blue-700 to-indigo-800 px-4 text-white shadow-xl shadow-blue-900/15">
         <div className="flex h-12 items-center justify-between gap-3">
           <div>
             <button
@@ -128,7 +129,7 @@ export default function CalendarPage() {
         </div>
       </section>
 
-      <section className="-ml-14 w-[calc(100%+3.5rem)] rounded-[32px] border border-teal-100 bg-white/75 p-3 shadow-sm shadow-teal-900/5">
+      <section className="-ml-14 w-[calc(100%+3.5rem)] rounded-[32px] border border-blue-100 bg-blue-50/70 p-3">
         <CalendarGrid
           month={currentMonth}
           selectedDate={selectedDate}

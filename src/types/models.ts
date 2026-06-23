@@ -4,8 +4,16 @@ export type CalendarSeverity = "none" | "low" | "medium" | "high" | "overdue";
 
 export interface ChecklistItem {
   id: string;
+  groupId: string;
   title: string;
   completed: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ChecklistGroup {
+  id: string;
+  name: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -73,6 +81,7 @@ export interface ResolvedTask {
 export interface AppSnapshot {
   series: TaskSeries[];
   occurrences: TaskOccurrence[];
+  checklistGroups: ChecklistGroup[];
   checklistItems: ChecklistItem[];
   menuItems: RestaurantMenuItem[];
   tags: Tag[];

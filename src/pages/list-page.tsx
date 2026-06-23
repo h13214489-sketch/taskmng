@@ -59,15 +59,15 @@ function Section({ tasks, visibleCount, onLoadMore }: SectionProps) {
 
 export default function ListPage() {
   const { t } = useTranslation();
-  const { series, occurrences, checklistItems, menuItems, tags, settings } = useAppStore();
+  const { series, occurrences, checklistGroups, checklistItems, menuItems, tags, settings } = useAppStore();
   const [outstandingCount, setOutstandingCount] = useState(PAGE_SIZE);
   const [todoCount, setTodoCount] = useState(PAGE_SIZE);
-  const [activeTab, setActiveTab] = useState<"outstanding" | "todo">("todo");
+  const [activeTab, setActiveTab] = useState<"outstanding" | "todo">("outstanding");
   const [query, setQuery] = useState("");
 
   const snapshot = useMemo(
-    () => ({ series, occurrences, checklistItems, menuItems, tags, settings }),
-    [series, occurrences, checklistItems, menuItems, tags, settings],
+    () => ({ series, occurrences, checklistGroups, checklistItems, menuItems, tags, settings }),
+    [series, occurrences, checklistGroups, checklistItems, menuItems, tags, settings],
   );
   const rawSections = useMemo(() => splitTaskSections(resolveActiveTasks(snapshot)), [snapshot]);
   const normalizedQuery = query.trim().toLowerCase();
@@ -92,35 +92,35 @@ export default function ListPage() {
 
   return (
     <div className="space-y-4">
-      <section className="h-12 rounded-[32px] border border-teal-100 bg-teal-50/70 p-1 shadow-sm shadow-teal-900/5">
+      <section className="h-12 rounded-[32px] border border-blue-100 bg-blue-50/70 p-1">
         <div className="grid h-full grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => setActiveTab("todo")}
-            className={
-              activeTab === "todo"
-                ? "inline-flex h-full items-center justify-center rounded-[24px] bg-teal-600 px-4 text-sm font-semibold text-white shadow-lg shadow-teal-900/10"
-                : "inline-flex h-full items-center justify-center rounded-[24px] bg-white px-4 text-sm font-semibold text-slate-600"
-            }
-          >
-            {t("todo")} ({sections.todo.length})
-          </button>
           <button
             type="button"
             onClick={() => setActiveTab("outstanding")}
             className={
               activeTab === "outstanding"
-                ? "inline-flex h-full items-center justify-center rounded-[24px] bg-teal-600 px-4 text-sm font-semibold text-white shadow-lg shadow-teal-900/10"
+                ? "inline-flex h-full items-center justify-center rounded-[24px] bg-blue-700 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-900/15"
                 : "inline-flex h-full items-center justify-center rounded-[24px] bg-white px-4 text-sm font-semibold text-slate-600"
             }
           >
             {t("outstanding")} ({sections.outstanding.length})
           </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("todo")}
+            className={
+              activeTab === "todo"
+                ? "inline-flex h-full items-center justify-center rounded-[24px] bg-blue-700 px-4 text-sm font-semibold text-white shadow-lg shadow-blue-900/15"
+                : "inline-flex h-full items-center justify-center rounded-[24px] bg-white px-4 text-sm font-semibold text-slate-600"
+            }
+          >
+            {t("todo")} ({sections.todo.length})
+          </button>
         </div>
       </section>
 
       <section className="-ml-14 w-[calc(100%+3.5rem)] space-y-4">
-        <div className="flex items-center gap-3 rounded-[28px] border border-teal-100 bg-white px-4 py-3 shadow-sm shadow-teal-900/5">
+        <div className="flex items-center gap-3 rounded-[28px] border border-blue-100 bg-white px-4 py-3">
           <Search className="h-4 w-4 text-slate-400" />
           <input
             value={query}

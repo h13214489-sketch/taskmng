@@ -58,11 +58,11 @@ async function deliverReminderNotification(language: Language, tasks: ResolvedTa
 }
 
 export function useReminderNotifications() {
-  const { isReady, series, occurrences, checklistItems, menuItems, tags, settings, updateSettings } = useAppStore();
+  const { isReady, series, occurrences, checklistGroups, checklistItems, menuItems, tags, settings, updateSettings } = useAppStore();
 
   const snapshot = useMemo(
-    () => ({ series, occurrences, checklistItems, menuItems, tags, settings }),
-    [series, occurrences, checklistItems, menuItems, tags, settings],
+    () => ({ series, occurrences, checklistGroups, checklistItems, menuItems, tags, settings }),
+    [series, occurrences, checklistGroups, checklistItems, menuItems, tags, settings],
   );
 
   useEffect(() => {

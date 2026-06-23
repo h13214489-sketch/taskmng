@@ -14,6 +14,7 @@ export default function TagsPage() {
   const {
     series,
     occurrences,
+    checklistGroups,
     checklistItems,
     menuItems,
     tags,
@@ -38,7 +39,7 @@ export default function TagsPage() {
   });
 
   const tasks = useMemo(() => {
-    const resolved = resolveActiveTasks({ series, occurrences, checklistItems, menuItems, tags, settings }).filter(
+    const resolved = resolveActiveTasks({ series, occurrences, checklistGroups, checklistItems, menuItems, tags, settings }).filter(
       (task) => task.status !== "complete",
     );
     if (!activeTagId) {
@@ -46,7 +47,7 @@ export default function TagsPage() {
     }
 
     return resolved.filter((task) => task.tagIds.includes(activeTagId));
-  }, [series, occurrences, checklistItems, menuItems, tags, settings, activeTagId]);
+  }, [series, occurrences, checklistGroups, checklistItems, menuItems, tags, settings, activeTagId]);
   const normalizedQuery = query.trim().toLowerCase();
   const visibleTasks = useMemo(() => {
     if (!normalizedQuery) {

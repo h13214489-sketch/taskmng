@@ -32,6 +32,7 @@ function createSnapshot(occurrences: TaskOccurrence[]): AppSnapshot {
   return {
     series: baseSeries,
     occurrences,
+    checklistGroups: [],
     checklistItems: [],
     menuItems: [],
     tags: [],
