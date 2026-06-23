@@ -9,13 +9,24 @@ type ChecklistFilter = "all" | "todo" | "complete";
 
 export default function ChecklistPage() {
   const { t } = useTranslation();
-  const { checklistGroups, checklistItems, addChecklistGroup, addChecklistItem, toggleChecklistItem, deleteChecklistItems } = useAppStore();
+  const {
+    checklistGroups,
+    checklistItems,
+    addChecklistGroup,
+    renameChecklistGroup,
+    deleteChecklistGroup,
+    addChecklistItem,
+    toggleChecklistItem,
+    deleteChecklistItems,
+  } = useAppStore();
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filter, setFilter] = useState<ChecklistFilter>("all");
   const [actionsOpen, setActionsOpen] = useState(false);
   const [createGroupOpen, setCreateGroupOpen] = useState(false);
   const [groupName, setGroupName] = useState("");
+  const [groupActionsId, setGroupActionsId] = useState<string | null>(null);
+  const [renameGroupId, setRenameGroupId] = useState<string | null>(null);
   const [draftByGroup, setDraftByGroup] = useState<Record<string, string>>({});
   const [collapsedByGroup, setCollapsedByGroup] = useState<Record<string, boolean>>({});
 
@@ -65,8 +76,8 @@ export default function ChecklistPage() {
         return next;
       }
 
-      return sortedGroups.reduce<Record<string, boolean>>((result, group, index) => {
-        result[group.id] = index !== 0;
+      return sortedGroups.reduce<Record<string, boolean>>((result, group) => {
+        result[group.id] = true;
         return result;
       }, {});
     });
@@ -89,11 +100,28 @@ export default function ChecklistPage() {
 
   function openCreateGroup() {
     setGroupName("");
+    setRenameGroupId(null);
     setCreateGroupOpen(true);
   }
 
   function closeCreateGroup() {
     setCreateGroupOpen(false);
+    setRenameGroupId(null);
+  }
+
+  function closeGroupActions() {
+    setGroupActionsId(null);
+  }
+
+  function openRenameGroup(groupId: string) {
+    const group = checklistGroups.find((item) => item.id === groupId);
+    if (!group) {
+      return;
+    }
+
+    setGroupName(group.name);
+    setRenameGroupId(groupId);
+    setCreateGroupOpen(true);
   }
 
   async function handleDeleteSelected() {
@@ -113,7 +141,12 @@ export default function ChecklistPage() {
       return;
     }
 
-    await addChecklistGroup(nextName);
+    if (renameGroupId) {
+      await renameChecklistGroup(renameGroupId, nextName);
+      setRenameGroupId(null);
+    } else {
+      await addChecklistGroup(nextName);
+    }
     closeCreateGroup();
   }
 
@@ -205,26 +238,37 @@ export default function ChecklistPage() {
 
               return (
                 <section key={group.id} className="rounded-[28px] border border-slate-100 bg-white p-3 shadow-sm shadow-blue-900/5">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCollapsedByGroup((current) => ({
-                        ...current,
-                        [group.id]: !(current[group.id] ?? true),
-                      }))
-                    }
-                    className="flex w-full items-center justify-between gap-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-900">{group.name}</p>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-500">
-                      <span className="text-xs font-semibold">
-                        {groupCompletedCount}/{items.length}
-                      </span>
-                      <ChevronDown className={cn("h-5 w-5 transition", !collapsed && "rotate-180")} />
-                    </div>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCollapsedByGroup((current) => ({
+                          ...current,
+                          [group.id]: !(current[group.id] ?? true),
+                        }))
+                      }
+                      className="flex min-w-0 flex-1 items-center justify-between gap-3"
+                    >
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-slate-900">{group.name}</p>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-500">
+                        <span className="text-xs font-semibold">
+                          {groupCompletedCount}/{items.length}
+                        </span>
+                        <ChevronDown className={cn("h-5 w-5 transition", !collapsed && "rotate-180")} />
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setGroupActionsId(group.id)}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 text-slate-600"
+                      aria-label={t("manage")}
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  </div>
 
                   {!collapsed ? (
                     <div className="mt-3 space-y-2">
@@ -256,8 +300,8 @@ export default function ChecklistPage() {
                                   : undefined
                               }
                               className={cn(
-                                "flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-3 transition",
-                                item.completed && "border-emerald-100 bg-emerald-50/40",
+                                "flex items-center justify-between gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 px-3 py-2 transition",
+                                item.completed && "border-emerald-100 bg-emerald-50/30",
                                 selectionMode && "cursor-pointer",
                                 selectionMode && selectedIds.includes(item.id) && "border-slate-900 bg-slate-900/5",
                               )}
@@ -270,27 +314,27 @@ export default function ChecklistPage() {
                               {selectionMode ? (
                                 <div
                                   className={cn(
-                                    "inline-flex h-9 w-9 items-center justify-center rounded-2xl border transition",
+                                    "inline-flex h-8 w-8 items-center justify-center rounded-2xl border transition",
                                     selectedIds.includes(item.id)
                                       ? "border-slate-900 bg-slate-900 text-white"
                                       : "border-slate-300 bg-white text-slate-500",
                                   )}
                                 >
-                                  {selectedIds.includes(item.id) ? <Check className="h-5 w-5" /> : null}
+                                  {selectedIds.includes(item.id) ? <Check className="h-4 w-4" /> : null}
                                 </div>
                               ) : (
                                 <button
                                   type="button"
                                   onClick={() => void toggleChecklistItem(item.id)}
                                   className={cn(
-                                    "inline-flex h-9 w-9 items-center justify-center rounded-2xl border transition",
+                                    "inline-flex h-8 w-8 items-center justify-center rounded-2xl border transition",
                                     item.completed
                                       ? "border-slate-900 bg-slate-900 text-white"
                                       : "border-slate-300 bg-white text-slate-500",
                                   )}
                                   aria-label={item.completed ? t("complete") : t("todo")}
                                 >
-                                  {item.completed ? <Check className="h-5 w-5" /> : null}
+                                  {item.completed ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
                                 </button>
                               )}
                             </div>
@@ -387,7 +431,7 @@ export default function ChecklistPage() {
         >
           <section className="w-full max-w-[22rem] rounded-[28px] bg-white p-4 shadow-2xl shadow-slate-900/15" onClick={(event) => event.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <p className="text-sm font-semibold text-slate-900">{t("addGroup")}</p>
+              <p className="text-sm font-semibold text-slate-900">{renameGroupId ? t("renameGroup") : t("addGroup")}</p>
               <button
                 type="button"
                 onClick={closeCreateGroup}
@@ -410,9 +454,49 @@ export default function ChecklistPage() {
                 disabled={!groupName.trim()}
                 className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
               >
-                {t("createGroup")}
+                {renameGroupId ? t("renameGroup") : t("createGroup")}
               </button>
             </form>
+          </section>
+        </div>
+      ) : null}
+
+      {groupActionsId ? (
+        <div className="fixed inset-0 z-[60] flex items-end bg-slate-900/35 backdrop-blur-sm" onClick={closeGroupActions}>
+          <section className="w-full rounded-t-[28px] bg-white p-4" onClick={(event) => event.stopPropagation()}>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  closeGroupActions();
+                  openRenameGroup(groupActionsId);
+                }}
+                className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white"
+              >
+                {t("renameGroup")}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = groupActionsId;
+                  closeGroupActions();
+                  if (!window.confirm(t("confirmDeleteGroup"))) {
+                    return;
+                  }
+                  void deleteChecklistGroup(target);
+                }}
+                className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700"
+              >
+                {t("deleteGroup")}
+              </button>
+              <button
+                type="button"
+                onClick={closeGroupActions}
+                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700"
+              >
+                {t("cancel")}
+              </button>
+            </div>
           </section>
         </div>
       ) : null}

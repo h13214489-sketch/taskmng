@@ -42,6 +42,8 @@ interface AppStore extends AppSnapshot {
   deleteTask: (task: ResolvedTask) => Promise<void>;
   endRoutineTask: (task: ResolvedTask) => Promise<void>;
   addChecklistGroup: (name: string) => Promise<void>;
+  renameChecklistGroup: (groupId: string, name: string) => Promise<void>;
+  deleteChecklistGroup: (groupId: string) => Promise<void>;
   addChecklistItem: (title: string, groupId?: string) => Promise<void>;
   toggleChecklistItem: (itemId: string) => Promise<void>;
   deleteChecklistItems: (itemIds: string[]) => Promise<void>;
@@ -312,6 +314,42 @@ export const useAppStore = create<AppStore>((set, get) => ({
     const group = createChecklistGroup(name);
     await db.checklistGroups.add(group);
     set((state) => ({ checklistGroups: [...state.checklistGroups, group] }));
+  },
+
+  async renameChecklistGroup(groupId, name) {
+    const nextName = name.trim();
+    if (!nextName) {
+      return;
+    }
+
+    const existing = get().checklistGroups.find((group) => group.id === groupId);
+    if (!existing) {
+      return;
+    }
+
+    const updated: ChecklistGroup = { ...existing, name: nextName, updatedAt: Date.now() };
+    await db.checklistGroups.put(updated);
+    set((state) => ({ checklistGroups: state.checklistGroups.map((group) => (group.id === updated.id ? updated : group)) }));
+  },
+
+  async deleteChecklistGroup(groupId) {
+    const hasGroup = get().checklistGroups.some((group) => group.id === groupId);
+    if (!hasGroup) {
+      return;
+    }
+
+    await db.transaction("rw", db.checklistGroups, db.checklistItems, async () => {
+      const relatedItems = await db.checklistItems.where("groupId").equals(groupId).toArray();
+      if (relatedItems.length > 0) {
+        await db.checklistItems.bulkDelete(relatedItems.map((item) => item.id));
+      }
+      await db.checklistGroups.delete(groupId);
+    });
+
+    set((state) => ({
+      checklistGroups: state.checklistGroups.filter((group) => group.id !== groupId),
+      checklistItems: state.checklistItems.filter((item) => item.groupId !== groupId),
+    }));
   },
 
   async addChecklistItem(title, groupId) {

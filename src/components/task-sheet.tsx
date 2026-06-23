@@ -1,10 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Camera, Trash2, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { ImageLightbox } from "@/components/image-lightbox";
 import { TagChip } from "@/components/tag-chip";
-import { cn } from "@/lib/utils";
 import type { AddTaskInput, ResolvedTask, Tag } from "@/types/models";
 import { toDisplayDate } from "@/utils/date";
 import { ImageUploadError, type ImageUploadErrorCode, optimizeImageFile } from "@/utils/image";
@@ -17,12 +16,12 @@ interface TaskSheetProps {
   selectedDate: string;
   onClose: () => void;
   onSave: (input: AddTaskInput) => Promise<void>;
-  onUpdate: (task: ResolvedTask, input: AddTaskInput) => Promise<void>;
   onConfirmComplete: (task: ResolvedTask, completionPhoto?: string) => Promise<void>;
-  onDeleteCompletionPhoto: (task: ResolvedTask) => Promise<void>;
   onDelete: (task: ResolvedTask) => Promise<void>;
   onEndRoutine: (task: ResolvedTask) => Promise<void>;
 }
+
+const defaultColors = ["#bfdbfe", "#93c5fd", "#60a5fa", "#3b82f6", "#2563eb", "#1d4ed8"];
 
 export function TaskSheet({
   open,
@@ -32,9 +31,7 @@ export function TaskSheet({
   selectedDate,
   onClose,
   onSave,
-  onUpdate,
   onConfirmComplete,
-  onDeleteCompletionPhoto,
   onDelete,
   onEndRoutine,
 }: TaskSheetProps) {
@@ -49,8 +46,7 @@ export function TaskSheet({
   const [previewImage, setPreviewImage] = useState<{ src: string; alt: string } | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
-  const photoInputId = useMemo(() => "task-sheet-photo-input", []);
-  const completionInputId = useMemo(() => "task-sheet-completion-input", []);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (mode !== "create") {
@@ -76,28 +72,17 @@ export function TaskSheet({
     setImageError(null);
   }, [mode, task?.seriesId, task?.date]);
 
-  useEffect(() => {
-    if (mode !== "detail" || !task) {
-      return;
+  const title = useMemo(() => {
+    if (mode === "detail") {
+      return t("detail");
     }
 
-    setName(task.name);
-    setDetail(task.detail);
-    setDeadline(toDisplayDate(task.date));
-    setIsRoutine(task.isRoutine);
-    setIsMustDo(task.isMustDo);
-    setTagIds(task.tagIds);
-    setPhoto(task.photo);
-    setImageError(null);
-  }, [mode, task?.seriesId, task?.date]);
-
-  const title = useMemo(() => {
     if (mode === "complete") {
       return t("complete");
     }
 
     return t("addTask");
-  }, [mode, t]);
+  }, [mode, task?.name, t]);
 
   if (!open || !mode) {
     return null;
@@ -123,7 +108,7 @@ export function TaskSheet({
     }
 
     try {
-      const payload: AddTaskInput = {
+      await onSave({
         name,
         detail,
         deadline,
@@ -131,15 +116,7 @@ export function TaskSheet({
         isMustDo,
         tagIds,
         photo,
-      };
-
-      if (mode === "detail" && task) {
-        await onUpdate(task, payload);
-        setImageError(null);
-        return;
-      }
-
-      await onSave(payload);
+      });
       setImageError(null);
     } catch {
       setImageError(t("imageSaveFailed"));
@@ -170,46 +147,94 @@ export function TaskSheet({
     }
   }
 
+  function openFilePicker() {
+    if (isProcessingImage) {
+      return;
+    }
+
+    fileInputRef.current?.click();
+  }
+
   return (
-    <div className={cn("fixed inset-0 z-50 flex bg-slate-900/40 backdrop-blur-sm", mode === "create" ? "items-stretch" : "items-end")}>
-      <section
-        className={cn(
-          "w-full overflow-y-auto bg-teal-50/95 px-5 shadow-2xl shadow-teal-900/15",
-          mode === "create"
-            ? "h-[100dvh] rounded-none pt-[max(2.25rem,env(safe-area-inset-top))] pb-0"
-            : "max-h-[92vh] rounded-t-[32px] pb-4 pt-4",
-        )}
-      >
-        {mode !== "create" ? <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" /> : null}
-        {mode !== "create" ? (
-          <div className="mb-3 flex items-center justify-between gap-4">
-            {mode === "detail" ? <div /> : <h2 className="text-lg font-semibold text-slate-900">{title}</h2>}
-            <div className="flex items-center gap-2">
-              {mode === "detail" && task ? (
-                <button
-                  type="button"
-                  onClick={() => void onDelete(task)}
-                  className="rounded-full border border-rose-200 bg-rose-50 p-2 text-rose-600 transition hover:border-rose-300"
-                  aria-label={t("delete")}
-                >
-                  <Trash2 className="h-5 w-5" />
+    <div className="fixed inset-0 z-50 flex items-end bg-slate-900/50 backdrop-blur-sm">
+      <section className="max-h-[90vh] w-full overflow-y-auto rounded-t-[32px] bg-blue-50 px-5 pb-8 pt-5 shadow-2xl shadow-blue-900/20">
+        <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" />
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-blue-100 bg-white p-2 text-slate-500 transition hover:border-blue-200"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {mode === "detail" && task ? (
+          <div className="space-y-4">
+            <div className="rounded-[28px] border border-blue-100 bg-white p-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-semibold text-slate-900">{task.name}</h3>
+                {task.isMustDo ? <span className="text-sm font-black text-rose-600">!</span> : null}
+              </div>
+              <p className="mt-2 text-sm text-slate-600">{task.detail || "-"}</p>
+              <p className="mt-3 text-xs text-slate-500">
+                {t("deadline")}: {toDisplayDate(task.date)}
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {tags
+                  .filter((tag) => task.tagIds.includes(tag.id))
+                  .map((tag) => (
+                    <TagChip key={tag.id} label={tag.name} color={tag.color} />
+                  ))}
+              </div>
+              {task.photo ? (
+                <button type="button" className="mt-4 block w-full" onClick={() => setPreviewImage({ src: task.photo ?? "", alt: task.name })}>
+                  <img src={task.photo} alt={task.name} className="h-44 w-full rounded-2xl object-cover cursor-zoom-in" loading="lazy" />
                 </button>
               ) : null}
+              {task.completionPhoto ? (
+                <div className="mt-4 space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("uploadRecord")}</p>
+                  <button
+                    type="button"
+                    className="block w-full"
+                    onClick={() => setPreviewImage({ src: task.completionPhoto ?? "", alt: `${task.name} ${t("uploadRecord")}` })}
+                  >
+                    <img
+                      src={task.completionPhoto}
+                      alt={`${task.name} ${t("uploadRecord")}`}
+                      className="h-44 w-full rounded-2xl object-cover cursor-zoom-in"
+                      loading="lazy"
+                    />
+                  </button>
+                </div>
+              ) : null}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => void onDelete(task)}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600"
+            >
+              <Trash2 className="h-4 w-4" />
+              {t("delete")}
+            </button>
+            {task.isRoutine ? (
               <button
                 type="button"
-                onClick={onClose}
-                  className="rounded-full border border-teal-100 bg-white p-2 text-slate-500 transition hover:border-teal-200"
-                aria-label={t("close")}
+                onClick={() => void onEndRoutine(task)}
+                className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white"
               >
-                <X className="h-5 w-5" />
+                {t("endRoutineTask")}
               </button>
-            </div>
+            ) : null}
           </div>
-        ) : null}
-
-        {mode === "complete" && task ? (
+        ) : mode === "complete" && task ? (
           <div className="space-y-4">
-            <div className="rounded-[28px] border border-teal-100 bg-white p-4">
+            <div className="rounded-[28px] border border-blue-100 bg-white p-4">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-semibold text-slate-900">{task.name}</h3>
                 {task.isMustDo ? <span className="text-sm font-black text-rose-600">!</span> : null}
@@ -226,42 +251,30 @@ export function TaskSheet({
 
             <div className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("uploadRecord")}</span>
-              <label
-                className={cn(
-                  "flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-teal-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-teal-300 hover:bg-teal-50",
-                  isProcessingImage && "cursor-not-allowed opacity-60",
-                )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={handleFileChange}
+                disabled={isProcessingImage}
+                tabIndex={-1}
+              />
+              <button
+                type="button"
+                onClick={openFilePicker}
+                disabled={isProcessingImage}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("uploadRecord")}...` : t("uploadRecord")}</span>
-                <input
-                  key={completionInputId}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                  disabled={isProcessingImage}
-                />
-              </label>
+              </button>
               <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
               {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
-              {photo ? (
-                <button
-                  type="button"
-                  onClick={() => setPhoto(undefined)}
-                  className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600"
-                >
-                  {t("removePhoto")}
-                </button>
-              ) : null}
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-2xl border border-teal-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
-              >
+              <button type="button" onClick={onClose} className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
                 {t("cancel")}
               </button>
               <button
@@ -275,56 +288,56 @@ export function TaskSheet({
                   }
                 }}
                 disabled={isProcessingImage}
-                className="rounded-2xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {t("complete")}
               </button>
             </div>
           </div>
         ) : (
-          <form className="flex min-h-full flex-col space-y-3" onSubmit={handleSubmit}>
-            <label className="block space-y-1.5">
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <label className="block space-y-2">
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("taskName")}</span>
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                className="w-full rounded-2xl border border-teal-100 bg-white px-4 py-3 text-base font-semibold text-slate-900 outline-none transition focus:border-teal-400"
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
                 placeholder={t("taskName")}
                 required
               />
             </label>
 
-            <label className="block space-y-1.5">
+            <label className="block space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("taskDetail")}</span>
               <textarea
                 value={detail}
                 onChange={(event) => setDetail(event.target.value)}
-                className="min-h-16 w-full rounded-2xl border border-teal-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-teal-400"
+                className="min-h-24 w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
                 placeholder={t("taskDetail")}
               />
             </label>
 
-            <label className="block space-y-1.5">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("deadline")}</span>
+            <label className="block space-y-2">
               <input
                 value={deadline}
                 onChange={(event) => setDeadline(event.target.value)}
-                className="w-full rounded-2xl border border-teal-100 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition focus:border-teal-400"
+                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
                 placeholder="dd/mm/yyyy"
                 required
               />
             </label>
 
-            <label className="flex items-center justify-between rounded-2xl border border-teal-100 bg-white px-4 py-3">
+            <label className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3">
               <span className="text-sm font-medium text-slate-700">{t("routineTask")}</span>
               <input type="checkbox" checked={isRoutine} onChange={(event) => setIsRoutine(event.target.checked)} />
             </label>
 
-            <label className="flex items-center justify-between rounded-2xl border border-teal-100 bg-white px-4 py-3">
+            <label className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3">
               <span className="text-sm font-medium text-slate-700">{t("mustDo")}</span>
               <input type="checkbox" checked={isMustDo} onChange={(event) => setIsMustDo(event.target.checked)} />
             </label>
 
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{t("chooseTags")}</span>
               <div className="flex flex-wrap gap-2">
                 {tags.map((tag) => (
@@ -334,33 +347,32 @@ export function TaskSheet({
                     color={tag.color}
                     selected={tagIds.includes(tag.id)}
                     onClick={() =>
-                      setTagIds((current) =>
-                        current.includes(tag.id) ? current.filter((item) => item !== tag.id) : [...current, tag.id],
-                      )
+                      setTagIds((current) => (current.includes(tag.id) ? current.filter((item) => item !== tag.id) : [...current, tag.id]))
                     }
                   />
                 ))}
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label
-                className={cn(
-                  "flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-teal-200 bg-white px-4 py-4 text-sm font-medium text-slate-600 transition hover:border-teal-300 hover:bg-teal-50",
-                  isProcessingImage && "cursor-not-allowed opacity-60",
-                )}
+            <div className="space-y-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="sr-only"
+                onChange={handleFileChange}
+                disabled={isProcessingImage}
+                tabIndex={-1}
+              />
+              <button
+                type="button"
+                onClick={openFilePicker}
+                disabled={isProcessingImage}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("photoUpload")}...` : t("photoUpload")}</span>
-                <input
-                  key={photoInputId}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleFileChange}
-                  disabled={isProcessingImage}
-                />
-              </label>
+              </button>
               <p className="text-xs text-slate-400">{t("imageUploadHint")}</p>
               {imageError ? <p className="text-sm text-rose-600">{imageError}</p> : null}
               {photo ? (
@@ -368,76 +380,30 @@ export function TaskSheet({
                   <img src={photo} alt={t("taskPreview")} className="h-40 w-full rounded-2xl object-cover cursor-zoom-in" />
                 </button>
               ) : null}
-              {photo ? (
-                <button
-                  type="button"
-                  onClick={() => setPhoto(undefined)}
-                  className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600"
-                >
-                  {t("removePhoto")}
-                </button>
-              ) : null}
             </div>
 
-            {mode === "detail" && task?.completionPhoto ? (
-              <div className="space-y-2">
-                <button
-                  type="button"
-                  className="block w-full"
-                  onClick={() => setPreviewImage({ src: task.completionPhoto ?? "", alt: `${task.name} ${t("uploadRecord")}` })}
-                >
-                  <img
-                    src={task.completionPhoto}
-                    alt={`${task.name} ${t("uploadRecord")}`}
-                    className="h-28 w-full rounded-2xl object-cover cursor-zoom-in"
-                    loading="lazy"
-                  />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void onDeleteCompletionPhoto(task)}
-                  className="w-full rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600"
-                >
-                  {t("removeRecord")}
-                </button>
-              </div>
-            ) : null}
-
-            {mode === "detail" && task?.isRoutine ? (
-              <button
-                type="button"
-                onClick={() => void onEndRoutine(task)}
-                className="w-full rounded-2xl border border-teal-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-teal-50"
-              >
-                {t("endRoutineTask")}
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button type="button" onClick={onClose} className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
+                {t("cancel")}
               </button>
-            ) : null}
-
-            <div
-              className={cn(
-                "sticky bottom-0 -mx-5 mt-auto bg-teal-50/95 px-5 backdrop-blur",
-                mode === "create" ? "pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3" : "pb-2 pt-3",
-              )}
-            >
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded-2xl border border-teal-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
-                >
-                  {t("cancel")}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isProcessingImage}
-                  className="rounded-2xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
-                >
-                  {t("saveTask")}
-                </button>
-              </div>
+              <button
+                type="submit"
+                disabled={isProcessingImage}
+                className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+              >
+                {t("saveTask")}
+              </button>
             </div>
           </form>
         )}
+
+        {mode === "create" ? (
+          <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+            {defaultColors.map((color) => (
+              <span key={color} className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
+            ))}
+          </div>
+        ) : null}
       </section>
       {previewImage ? <ImageLightbox open={true} src={previewImage.src} alt={previewImage.alt} onClose={() => setPreviewImage(null)} /> : null}
     </div>
