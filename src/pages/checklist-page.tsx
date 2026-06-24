@@ -152,7 +152,7 @@ export default function ChecklistPage() {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[30px] border border-blue-100 bg-white/90 p-3 shadow-sm shadow-blue-900/5">
+      <section className="rounded-[30px] border border-teal-200 bg-white p-3 shadow-sm shadow-teal-900/10">
         <div className="flex items-center gap-2">
           <div className="grid min-w-0 flex-1 grid-cols-2 gap-2">
             <button
@@ -160,11 +160,11 @@ export default function ChecklistPage() {
               onClick={() => setFilter((current) => (current === "todo" ? "all" : "todo"))}
               aria-pressed={filter === "todo"}
               className={cn(
-                "rounded-[22px] bg-blue-50 px-3 py-2.5 text-left transition hover:bg-blue-100",
-                filter === "todo" && "ring-2 ring-blue-700/30",
+                "rounded-[22px] bg-teal-50 px-3 py-2.5 text-left transition hover:bg-teal-100",
+                filter === "todo" && "ring-2 ring-teal-700/30",
               )}
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-blue-500">{t("todo")}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-700">{t("todo")}</p>
               <p className="mt-0.5 text-lg font-semibold text-slate-900">{remainingCount}</p>
             </button>
             <button
@@ -189,7 +189,7 @@ export default function ChecklistPage() {
                   setSelectionMode(false);
                   setSelectedIds([]);
                 }}
-                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
+                className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-teal-100 bg-teal-50 text-slate-600 transition hover:bg-teal-100"
                 aria-label={t("cancel")}
               >
                 <X className="h-5 w-5" />
@@ -212,7 +212,7 @@ export default function ChecklistPage() {
             <button
               type="button"
               onClick={openActions}
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-slate-600 transition hover:bg-blue-100"
+              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-teal-200 bg-white text-slate-700 transition hover:bg-teal-50"
               aria-label={t("manage")}
             >
               <MoreHorizontal className="h-5 w-5" />
@@ -231,13 +231,14 @@ export default function ChecklistPage() {
             {sortedGroups.map((group) => {
               const items = sortedItems.filter((item) => item.groupId === group.id);
               const groupCompletedCount = items.filter((item) => item.completed).length;
+              const groupProgress = items.length === 0 ? 0 : Math.round((groupCompletedCount / items.length) * 100);
               const visibleItems = filteredItems.filter((item) => item.groupId === group.id);
               const collapsed = collapsedByGroup[group.id] ?? true;
               const draft = draftByGroup[group.id] ?? "";
               const canSubmit = Boolean(draft.trim());
 
               return (
-                <section key={group.id} className="rounded-[28px] border border-slate-100 bg-white p-3 shadow-sm shadow-blue-900/5">
+                <section key={group.id} className="rounded-[28px] border border-teal-200/70 bg-white p-3 shadow-sm shadow-teal-900/10">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -249,8 +250,17 @@ export default function ChecklistPage() {
                       }
                       className="flex min-w-0 flex-1 items-center justify-between gap-3"
                     >
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex items-center gap-2">
                         <p className="truncate text-sm font-semibold text-slate-900">{group.name}</p>
+                        <div className="flex items-center gap-1.5 rounded-full bg-teal-50 px-2 py-1">
+                          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-teal-100">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-teal-500 via-teal-600 to-emerald-500 transition-[width]"
+                              style={{ width: `${groupProgress}%` }}
+                            />
+                          </div>
+                          <span className="shrink-0 text-[10px] font-semibold text-teal-800">{groupProgress}%</span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 text-slate-500">
                         <span className="text-xs font-semibold">
@@ -367,7 +377,7 @@ export default function ChecklistPage() {
                             type="submit"
                             disabled={!canSubmit}
                             className={cn(
-                              "inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-blue-700 text-white transition",
+                              "inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-teal-700 text-white transition hover:bg-teal-800",
                               !canSubmit && "cursor-not-allowed bg-slate-200 text-slate-500",
                             )}
                             aria-label={t("saveTask")}
@@ -395,7 +405,7 @@ export default function ChecklistPage() {
                   closeActions();
                   openCreateGroup();
                 }}
-                className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white"
+                className="w-full rounded-2xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white"
               >
                 {t("addGroup")}
               </button>
@@ -406,7 +416,7 @@ export default function ChecklistPage() {
                   setSelectionMode(true);
                   setSelectedIds([]);
                 }}
-                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
+                className="w-full rounded-2xl border border-teal-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
               >
                 {t("manage")}
               </button>
@@ -446,13 +456,13 @@ export default function ChecklistPage() {
                 value={groupName}
                 onChange={(event) => setGroupName(event.target.value)}
                 placeholder={t("groupName")}
-                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
+                className="w-full rounded-2xl border border-teal-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-teal-400"
                 autoFocus
               />
               <button
                 type="submit"
                 disabled={!groupName.trim()}
-                className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white transition disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+                className="w-full rounded-2xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
               >
                 {renameGroupId ? t("renameGroup") : t("createGroup")}
               </button>
@@ -471,7 +481,7 @@ export default function ChecklistPage() {
                   closeGroupActions();
                   openRenameGroup(groupActionsId);
                 }}
-                className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white"
+                className="w-full rounded-2xl bg-teal-600 px-4 py-3 text-sm font-semibold text-white"
               >
                 {t("renameGroup")}
               </button>

@@ -16,6 +16,7 @@ interface CalendarGridProps {
   month: string;
   selectedDate: string;
   severityByDate: Record<string, CalendarSeverity>;
+  holidayByDate?: Record<string, string>;
   onSelectDate: (date: string) => void;
 }
 
@@ -35,7 +36,7 @@ const severityEdgeStyles: Record<CalendarSeverity, string> = {
   overdue: "border-rose-500/80",
 };
 
-export function CalendarGrid({ month, selectedDate, severityByDate, onSelectDate }: CalendarGridProps) {
+export function CalendarGrid({ month, selectedDate, severityByDate, holidayByDate, onSelectDate }: CalendarGridProps) {
   const monthDate = parseStorageDate(month);
   const range = eachDayOfInterval({
     start: startOfWeek(startOfMonth(monthDate), { weekStartsOn: 1 }),
@@ -57,12 +58,14 @@ export function CalendarGrid({ month, selectedDate, severityByDate, onSelectDate
           const hasTasks = severity !== "none";
           const isSelected = storageDate === selectedDate;
           const isToday = storageDate === today;
+          const holidayName = holidayByDate?.[storageDate];
 
           return (
             <button
               key={storageDate}
               type="button"
               onClick={() => onSelectDate(storageDate)}
+              title={holidayName ?? undefined}
               className={cn(
                 "relative aspect-square rounded-2xl border p-2 text-left text-xs transition",
                 severityStyles[severity],
@@ -75,6 +78,7 @@ export function CalendarGrid({ month, selectedDate, severityByDate, onSelectDate
               )}
             >
               <span className={cn("font-semibold", isToday && "font-extrabold text-slate-950")}>{format(day, "d")}</span>
+              {holidayName ? <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-rose-500" /> : null}
             </button>
           );
         })}

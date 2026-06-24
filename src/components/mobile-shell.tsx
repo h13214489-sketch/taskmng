@@ -129,12 +129,12 @@ export function MobileShell() {
   const shouldShowFab = !["/checklist", "/menu", "/settings"].includes(location.pathname);
 
   return (
-    <div className="min-h-screen bg-[#edf9f6] text-slate-900">
-      {menuExpanded ? <div className="fixed inset-0 z-40 bg-slate-900/20" onClick={requestCloseMenu} /> : null}
+    <div className="min-h-screen bg-gradient-to-b from-white via-teal-50 to-emerald-50 text-slate-950">
+      {menuExpanded ? <div className="fixed inset-0 z-40 bg-slate-950/30" onClick={requestCloseMenu} /> : null}
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-teal-100/80 bg-white/95 px-4 py-5 shadow-xl shadow-teal-900/5 backdrop-blur transition-transform duration-200",
+          "fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-teal-200/80 bg-white/90 px-4 py-5 shadow-xl shadow-teal-900/10 backdrop-blur transition-transform duration-200",
           menuExpanded ? "translate-x-0" : "-translate-x-full",
         )}
         aria-hidden={!menuExpanded}
@@ -156,7 +156,7 @@ export function MobileShell() {
                 }}
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold transition",
-                  active ? "bg-teal-600 text-white shadow-lg shadow-teal-900/10" : "text-slate-500 hover:bg-teal-50",
+                  active ? "bg-teal-700 text-white shadow-lg shadow-teal-900/15" : "text-slate-600 hover:bg-teal-50/80",
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
@@ -181,7 +181,7 @@ export function MobileShell() {
                 }}
                 className={cn(
                   "flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-semibold transition",
-                  active ? "bg-teal-600 text-white shadow-lg shadow-teal-900/10" : "text-slate-500 hover:bg-teal-50",
+                  active ? "bg-teal-700 text-white shadow-lg shadow-teal-900/15" : "text-slate-600 hover:bg-teal-50/80",
                 )}
               >
                 <Icon className="h-5 w-5 shrink-0" />
@@ -198,7 +198,7 @@ export function MobileShell() {
             <button
               type="button"
               onClick={menuExpanded ? requestCloseMenu : toggleMenu}
-              className="z-30 mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-600 text-white shadow-lg shadow-teal-900/15"
+              className="z-30 mt-0.5 inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-teal-700 text-white shadow-lg shadow-teal-900/20"
               aria-label={menuExpanded ? t("close") : t("menu")}
             >
               {menuExpanded ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -214,7 +214,7 @@ export function MobileShell() {
         <button
           type="button"
           onClick={() => openCreateSheet(selectedDate)}
-          className="fixed bottom-6 right-4 z-30 inline-flex h-16 w-16 items-center justify-center rounded-full bg-teal-500 text-white shadow-2xl shadow-teal-500/25 transition hover:scale-[1.02] hover:bg-teal-600"
+          className="fixed bottom-6 right-4 z-30 inline-flex h-16 w-16 items-center justify-center rounded-full bg-teal-600 text-white shadow-2xl shadow-teal-900/20 transition hover:scale-[1.02] hover:bg-teal-700"
         >
           <Plus className="h-7 w-7" />
         </button>

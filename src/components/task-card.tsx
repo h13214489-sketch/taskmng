@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import type { ResolvedTask, Tag } from "@/types/models";
-import { toDisplayDate } from "@/utils/date";
 
 interface TaskCardProps {
   task: ResolvedTask;
@@ -29,8 +28,8 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
         }
       }}
       className={cn(
-        "cursor-pointer rounded-[28px] border border-teal-100 bg-white/95 p-4 shadow-sm shadow-teal-900/5",
-        task.status === "pending" && "border-slate-200 bg-slate-100/90 shadow-slate-900/5",
+        "cursor-pointer rounded-[28px] border border-teal-200 bg-white p-4 shadow-sm shadow-teal-900/10",
+        task.status === "pending" && "border-amber-200 bg-amber-50 shadow-amber-900/5",
         task.status === "complete" && "border-slate-200 bg-slate-50/80",
       )}
     >
@@ -41,9 +40,6 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
             {task.isMustDo ? <span className="text-sm font-black text-rose-600">!</span> : null}
             {task.photo || task.completionPhoto ? <Camera className="h-4 w-4 text-slate-400" /> : null}
           </div>
-          <p className="text-xs text-slate-500">
-            {t("deadline")}: {toDisplayDate(task.date)}
-          </p>
         </div>
         <div className="flex max-w-[9rem] flex-wrap justify-end gap-1.5">
           {taskTags.map((tag) => (
@@ -84,7 +80,7 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
               "inline-flex items-center justify-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-semibold transition",
               task.status === "pending"
                 ? "bg-slate-700 text-white hover:bg-slate-800"
-                : "bg-teal-600 text-white hover:bg-teal-700",
+                  : "bg-teal-700 text-white hover:bg-teal-800",
             )}
           >
             <CheckCheck className="h-4 w-4" />
@@ -109,7 +105,7 @@ export function TaskCard({ task, tags, onComplete, onPending, onSetTodo, onOpenD
                 event.stopPropagation();
                 onPending();
               }}
-              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-teal-100 bg-teal-50 px-3 py-2.5 text-xs font-semibold text-teal-700 transition hover:bg-teal-100"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs font-semibold text-amber-800 transition hover:bg-amber-100"
             >
               <Clock3 className="h-4 w-4" />
               {t("pending")}

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import { CalendarGrid } from "@/components/calendar-grid";
 import { TaskCard } from "@/components/task-card";
+import { useHongKongPublicHolidays } from "@/hooks/use-hk-public-holidays";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/store/use-app-store";
 import type { Language } from "@/types/models";
@@ -41,6 +42,8 @@ export default function CalendarPage() {
   const monthTasks = useMemo(() => resolveTasksForMonth(snapshot, parseStorageDate(currentMonth)), [snapshot, currentMonth]);
   const selectedTasks = useMemo(() => resolveTasksForDate(snapshot, selectedDate), [snapshot, selectedDate]);
   const isSelectedToday = selectedDate === todayStorageDate();
+  const { holidayByDate } = useHongKongPublicHolidays(settings.language);
+  const selectedHoliday = holidayByDate[selectedDate];
 
   const severityByDate = useMemo(() => {
     return monthTasks.reduce<Record<string, ReturnType<typeof buildCalendarSeverity>>>((result, task) => {
@@ -93,7 +96,7 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4">
-      <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-blue-700 via-blue-700 to-indigo-800 px-4 text-white shadow-xl shadow-blue-900/15">
+      <section className="rounded-[28px] border border-white/10 bg-gradient-to-br from-teal-700 via-teal-700 to-emerald-700 px-4 text-white shadow-xl shadow-teal-900/20">
         <div className="flex h-12 items-center justify-between gap-3">
           <div>
             <button
@@ -129,11 +132,12 @@ export default function CalendarPage() {
         </div>
       </section>
 
-      <section className="-ml-14 w-[calc(100%+3.5rem)] rounded-[32px] border border-blue-100 bg-blue-50/70 p-3">
+      <section className="-ml-14 w-[calc(100%+3.5rem)] rounded-[32px] border border-teal-200 bg-white/70 p-3 shadow-sm shadow-teal-900/10">
         <CalendarGrid
           month={currentMonth}
           selectedDate={selectedDate}
           severityByDate={severityByDate}
+          holidayByDate={holidayByDate}
           onSelectDate={setSelectedDate}
         />
       </section>
@@ -148,6 +152,12 @@ export default function CalendarPage() {
         >
           {selectedDate}
         </h2>
+
+        {selectedHoliday ? (
+          <div className="rounded-[22px] border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-800">
+            {t("publicHoliday")}: {selectedHoliday}
+          </div>
+        ) : null}
 
         {selectedTasks.length === 0 ? (
           <div className="rounded-[28px] border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">

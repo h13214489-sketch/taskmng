@@ -157,7 +157,7 @@ export function TaskSheet({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-slate-900/50 backdrop-blur-sm">
-      <section className="max-h-[90vh] w-full overflow-y-auto rounded-t-[32px] bg-blue-50 px-5 pb-8 pt-5 shadow-2xl shadow-blue-900/20">
+      <section className="max-h-[90vh] w-full overflow-y-auto rounded-t-[32px] bg-gradient-to-b from-white via-teal-50 to-emerald-50 px-5 pb-8 pt-5 shadow-2xl shadow-teal-900/20">
         <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-slate-200" />
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
@@ -166,7 +166,7 @@ export function TaskSheet({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full border border-blue-100 bg-white p-2 text-slate-500 transition hover:border-blue-200"
+            className="rounded-full border border-teal-200 bg-white p-2 text-slate-700 transition hover:bg-teal-50"
           >
             <X className="h-5 w-5" />
           </button>
@@ -174,7 +174,7 @@ export function TaskSheet({
 
         {mode === "detail" && task ? (
           <div className="space-y-4">
-            <div className="rounded-[28px] border border-blue-100 bg-white p-4">
+            <div className="rounded-[28px] border border-teal-200 bg-white p-4 shadow-sm shadow-teal-900/10">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-semibold text-slate-900">{task.name}</h3>
                 {task.isMustDo ? <span className="text-sm font-black text-rose-600">!</span> : null}
@@ -226,7 +226,7 @@ export function TaskSheet({
               <button
                 type="button"
                 onClick={() => void onEndRoutine(task)}
-                className="w-full rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white"
+                className="w-full rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-800"
               >
                 {t("endRoutineTask")}
               </button>
@@ -234,7 +234,7 @@ export function TaskSheet({
           </div>
         ) : mode === "complete" && task ? (
           <div className="space-y-4">
-            <div className="rounded-[28px] border border-blue-100 bg-white p-4">
+            <div className="rounded-[28px] border border-teal-200 bg-white p-4 shadow-sm shadow-teal-900/10">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-semibold text-slate-900">{task.name}</h3>
                 {task.isMustDo ? <span className="text-sm font-black text-rose-600">!</span> : null}
@@ -264,7 +264,7 @@ export function TaskSheet({
                 type="button"
                 onClick={openFilePicker}
                 disabled={isProcessingImage}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-teal-300 bg-white px-4 py-5 text-sm font-medium text-slate-700 transition hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("uploadRecord")}...` : t("uploadRecord")}</span>
@@ -274,7 +274,7 @@ export function TaskSheet({
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <button type="button" onClick={onClose} className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
+              <button type="button" onClick={onClose} className="rounded-2xl border border-teal-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
                 {t("cancel")}
               </button>
               <button
@@ -288,7 +288,7 @@ export function TaskSheet({
                   }
                 }}
                 disabled={isProcessingImage}
-                className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {t("complete")}
               </button>
@@ -301,7 +301,7 @@ export function TaskSheet({
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
-                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
+                className="w-full rounded-2xl border border-teal-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-teal-500"
                 placeholder={t("taskName")}
                 required
               />
@@ -312,7 +312,7 @@ export function TaskSheet({
               <textarea
                 value={detail}
                 onChange={(event) => setDetail(event.target.value)}
-                className="min-h-24 w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
+                className="min-h-24 w-full rounded-2xl border border-teal-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-teal-500"
                 placeholder={t("taskDetail")}
               />
             </label>
@@ -321,18 +321,18 @@ export function TaskSheet({
               <input
                 value={deadline}
                 onChange={(event) => setDeadline(event.target.value)}
-                className="w-full rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-400"
+                className="w-full rounded-2xl border border-teal-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-teal-500"
                 placeholder="dd/mm/yyyy"
                 required
               />
             </label>
 
-            <label className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3">
+            <label className="flex items-center justify-between rounded-2xl border border-teal-200 bg-white px-4 py-3">
               <span className="text-sm font-medium text-slate-700">{t("routineTask")}</span>
               <input type="checkbox" checked={isRoutine} onChange={(event) => setIsRoutine(event.target.checked)} />
             </label>
 
-            <label className="flex items-center justify-between rounded-2xl border border-blue-100 bg-white px-4 py-3">
+            <label className="flex items-center justify-between rounded-2xl border border-teal-200 bg-white px-4 py-3">
               <span className="text-sm font-medium text-slate-700">{t("mustDo")}</span>
               <input type="checkbox" checked={isMustDo} onChange={(event) => setIsMustDo(event.target.checked)} />
             </label>
@@ -368,7 +368,7 @@ export function TaskSheet({
                 type="button"
                 onClick={openFilePicker}
                 disabled={isProcessingImage}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-blue-200 bg-white px-4 py-5 text-sm font-medium text-slate-600 transition hover:border-blue-300 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-teal-300 bg-white px-4 py-5 text-sm font-medium text-slate-700 transition hover:bg-teal-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Camera className="h-4 w-4" />
                 <span>{isProcessingImage ? `${t("photoUpload")}...` : t("photoUpload")}</span>
@@ -383,13 +383,13 @@ export function TaskSheet({
             </div>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <button type="button" onClick={onClose} className="rounded-2xl border border-blue-100 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
+              <button type="button" onClick={onClose} className="rounded-2xl border border-teal-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700">
                 {t("cancel")}
               </button>
               <button
                 type="submit"
                 disabled={isProcessingImage}
-                className="rounded-2xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="rounded-2xl bg-teal-700 px-4 py-3 text-sm font-semibold text-white hover:bg-teal-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {t("saveTask")}
               </button>
